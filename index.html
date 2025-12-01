@@ -37,9 +37,10 @@
 
     <div class="container mx-auto p-4 md:p-8">
         <header class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-slate-900">Geo-Tag Watermark Generator</h1>
+            <!-- Dynamic header updated by JavaScript based on mode -->
+            <h1 id="mainTitle" class="text-4xl font-bold text-slate-900">Geo-Tag Watermark Generator</h1>
             <div class="max-w-2xl mx-auto mt-4 mb-2 text-base text-slate-700 bg-slate-100 rounded-lg p-4 shadow">
-                <strong>About:</strong> This tool allows you to add geo-tagged watermark information to your images, including latitude, longitude, elevation, accuracy, time, and custom notes. You can customize the watermark style and position, and automatically fetch location and time data for convenience.
+                <strong>About:</strong> This tool allows you to add geo-tagged or chainage-based watermark information to your images. You can customize the watermark style, position, and automatically fetch location and time data for convenience.
             </div>
         </header>
 
@@ -49,57 +50,101 @@
                 <h2 class="text-2xl font-bold mb-4 border-b pb-2">Controls</h2>
                 
                 <div class="space-y-4">
+
+                    <!-- 1. Upload Image -->
                     <div>
                         <label for="imageLoader" class="block text-sm font-medium text-slate-700 mb-1">1. Upload Image</label>
                         <input type="file" id="imageLoader" name="imageLoader" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-slate-50 file:text-slate-700 hover:file:bg-slate-100"/>
                     </div>
                     
-                    <div class="pt-4">
-                        <h3 class="text-lg font-semibold text-slate-800 mb-2">2. Watermark Details</h3>
-                        <div class="bg-white rounded-lg shadow p-4 space-y-4">
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <label for="latitude" class="block text-sm font-medium text-slate-700">Latitude</label>
-                                    <input type="text" id="latitude" class="mt-1 block w-full rounded-md border border-slate-300 shadow-sm focus:border-slate-500 focus:ring-2 focus:ring-slate-500 transition" value="" placeholder="33.436187">
-                                </div>
-                                <div>
-                                    <label for="longitude" class="block text-sm font-medium text-slate-700">Longitude</label>
-                                    <input type="text" id="longitude" class="mt-1 block w-full rounded-md border border-slate-300 shadow-sm focus:border-slate-500 focus:ring-2 focus:ring-slate-500 transition" value="" placeholder="75.605647">
-                                </div>
-                                <div class="sm:col-span-2">
-                                    <button id="pickGeoBtn" type="button" class="w-full px-3 py-2 mt-2 rounded bg-slate-700 text-white text-xs font-semibold hover:bg-slate-800 focus:ring-2 focus:ring-slate-500 transition">Pick Automatically</button>
-                                </div>
-                                <div>
-                                    <label for="elevation" class="block text-sm font-medium text-slate-700">Elevation</label>
-                                    <input type="text" id="elevation" class="mt-1 block w-full rounded-md border border-slate-300 shadow-sm focus:border-slate-500 focus:ring-2 focus:ring-slate-500 transition" value="" placeholder="1452.0±199 m">
-                                </div>
-                                <div>
-                                    <label for="accuracy" class="block text-sm font-medium text-slate-700">Accuracy</label>
-                                    <input type="text" id="accuracy" class="mt-1 block w-full rounded-md border border-slate-300 shadow-sm focus:border-slate-500 focus:ring-2 focus:ring-slate-500 transition" value="" placeholder="13.7 m">
-                                </div>
-                                <div class="sm:col-span-2">
-                                    <label for="dateTime" class="block text-sm font-medium text-slate-700">Time</label>
-                                    <div class="flex flex-col sm:flex-row gap-2 items-center">
-                                        <input type="text" id="dateTime" class="mt-1 block w-full rounded-md border border-slate-300 shadow-sm focus:border-slate-500 focus:ring-2 focus:ring-slate-500 transition" value="" placeholder="01-05-2024 12:26">
-                                        <button id="pickTimeBtn" type="button" class="w-full sm:w-auto px-3 py-2 rounded bg-slate-700 text-white text-xs font-semibold hover:bg-slate-800 focus:ring-2 focus:ring-slate-500 transition">Pick Time</button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div>
-                                <label for="note" class="block text-sm font-medium text-slate-700">Note (Single Line)</label>
-                                <textarea id="note" rows="2" class="mt-1 block w-full rounded-md border border-slate-300 shadow-sm focus:border-slate-500 focus:ring-2 focus:ring-slate-500 transition" placeholder="Add a note or any other Details"></textarea>
-                            </div>
+                    <!-- 1b. Mode Selector -->
+                    <div class="pt-4 border-t">
+                        <h3 class="text-lg font-semibold text-slate-800 mb-2">2. Select Watermark Mode</h3>
+                        <div class="flex gap-4 p-3 bg-white rounded-lg shadow">
+                            <label class="flex items-center">
+                                <input type="radio" name="watermarkMode" value="geoTag" id="modeGeoTag" checked class="mr-2 h-4 w-4 text-slate-600 focus:ring-slate-500">
+                                <span class="text-sm font-medium text-slate-700">Geo-Tag Mode</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="watermarkMode" value="chainage" id="modeChainage" class="mr-2 h-4 w-4 text-slate-600 focus:ring-slate-500">
+                                <span class="text-sm font-medium text-slate-700">Chainage Mode</span>
+                            </label>
                         </div>
                     </div>
 
+                    <!-- 3. Watermark Details -->
                     <div class="pt-4">
-                        <h3 class="text-lg font-semibold text-slate-800 mb-2 border-b pb-2">3. Style Options</h3>
+                        <h3 class="text-lg font-semibold text-slate-800 mb-2">3. Watermark Details</h3>
+                        <div class="bg-white rounded-lg shadow p-4 space-y-4">
+                            
+                            <!-- GEO-TAG FIELDS: Visible in Geo-Tag Mode -->
+                            <div id="geoTagModeFields">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="latitude" class="block text-sm font-medium text-slate-700">Latitude</label>
+                                        <input type="text" id="latitude" class="mt-1 block w-full rounded-md border border-slate-300 shadow-sm focus:border-slate-500 focus:ring-2 focus:ring-slate-500 transition" value="" placeholder="33.436187">
+                                    </div>
+                                    <div>
+                                        <label for="longitude" class="block text-sm font-medium text-slate-700">Longitude</label>
+                                        <input type="text" id="longitude" class="mt-1 block w-full rounded-md border border-slate-300 shadow-sm focus:border-slate-500 focus:ring-2 focus:ring-slate-500 transition" value="" placeholder="75.605647">
+                                    </div>
+                                    <div class="sm:col-span-2">
+                                        <button id="pickGeoBtn" type="button" class="w-full px-3 py-2 mt-2 rounded bg-slate-700 text-white text-xs font-semibold hover:bg-slate-800 focus:ring-2 focus:ring-slate-500 transition">Pick Automatically</button>
+                                        <p id="geoErrorMsg" class="text-xs text-red-500 mt-1 hidden">Geolocation error.</p>
+                                    </div>
+                                    <div>
+                                        <label for="elevation" class="block text-sm font-medium text-slate-700">Elevation</label>
+                                        <input type="text" id="elevation" class="mt-1 block w-full rounded-md border border-slate-300 shadow-sm focus:border-slate-500 focus:ring-2 focus:ring-slate-500 transition" value="" placeholder="1452.0±199 m">
+                                    </div>
+                                    <div>
+                                        <label for="accuracy" class="block text-sm font-medium text-slate-700">Accuracy</label>
+                                        <input type="text" id="accuracy" class="mt-1 block w-full rounded-md border border-slate-300 shadow-sm focus:border-slate-500 focus:ring-2 focus:ring-slate-500 transition" value="" placeholder="13.7 m">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label for="note" class="block text-sm font-medium text-slate-700">Note (Single Line)</label>
+                                    <textarea id="note" rows="2" class="mt-1 block w-full rounded-md border border-slate-300 shadow-sm focus:border-slate-500 focus:ring-2 focus:ring-slate-500 transition" placeholder="Add a note or any other Details"></textarea>
+                                </div>
+                            </div>
+
+                            <!-- CHAINAGE FIELD: Visible in Chainage Mode -->
+                            <div id="chainageModeFields" class="hidden">
+                                <div>
+                                    <label for="chainageNumber" class="block text-sm font-medium text-slate-700">Chainage Number</label>
+                                    <input type="text" id="chainageNumber" class="mt-1 block w-full rounded-md border border-slate-300 shadow-sm focus:border-slate-500 focus:ring-2 focus:ring-slate-500 transition" value="" placeholder="C123+45.67">
+                                </div>
+                            </div>
+                            
+                            <!-- SHARED FIELDS: Date and Time -->
+                            <div class="sm:col-span-2 pt-2 border-t border-slate-200">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="dateInput" class="block text-sm font-medium text-slate-700">Date</label>
+                                        <input type="text" id="dateInput" class="mt-1 block w-full rounded-md border border-slate-300 shadow-sm focus:border-slate-500 focus:ring-2 focus:ring-slate-500 transition" value="" placeholder="01-05-2024">
+                                    </div>
+                                    <div>
+                                        <label for="timeInput" class="block text-sm font-medium text-slate-700">Time</label>
+                                        <input type="text" id="timeInput" class="mt-1 block w-full rounded-md border border-slate-300 shadow-sm focus:border-slate-500 focus:ring-2 focus:ring-slate-500 transition" value="" placeholder="12:26">
+                                    </div>
+                                    <div class="sm:col-span-2">
+                                        <button id="pickDateTimeBtn" type="button" class="w-full px-3 py-2 mt-2 rounded bg-slate-700 text-white text-xs font-semibold hover:bg-slate-800 focus:ring-2 focus:ring-slate-500 transition">Pick Current Date & Time</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- 4. Style Options (Remains the same and applies to both modes) -->
+                    <div class="pt-4">
+                        <h3 class="text-lg font-semibold text-slate-800 mb-2 border-b pb-2">4. Style Options</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-4 items-center">
                             <div>
                                 <label for="fontSize" class="block text-sm font-medium text-slate-700 mb-1">Font Size (px)</label>
                                 <div class="flex flex-col md:flex-row items-center gap-2">
-                                    <input type="range" id="fontSize" min="10" max="60" value="0" step="2" class="w-full md:w-2/3 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
-                                    <input type="number" id="fontSizeInput" min="10" max="60" value="0" step="2" class="w-full md:w-16 px-2 py-1 rounded border border-slate-300 text-sm">
+                                    <!-- Initial value set to 24px -->
+                                    <input type="range" id="fontSize" min="10" max="60" value="24" step="2" class="w-full md:w-2/3 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                                    <input type="number" id="fontSizeInput" min="10" max="60" value="24" step="2" class="w-full md:w-16 px-2 py-1 rounded border border-slate-300 text-sm">
                                 </div>
                             </div>
                             <div>
@@ -131,13 +176,13 @@
                             <div>
                                 <label for="lineSpacingRatio" class="block text-sm font-medium text-slate-700 mb-1">Line Spacing Ratio</label>
                                 <div class="flex flex-col md:flex-row items-center gap-2">
-                                    <input type="range" id="lineSpacingRatio" min="1.0" max="2.0" value="0" step="0.2" class="w-full md:w-2/3 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
-                                    <input type="number" id="lineSpacingRatioInput" min="1.0" max="2.0" value="0" step="0.1" class="w-full md:w-16 px-2 py-1 rounded border border-slate-300 text-sm">
+                                    <input type="range" id="lineSpacingRatio" min="1.0" max="2.0" value="1.2" step="0.1" class="w-full md:w-2/3 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                                    <input type="number" id="lineSpacingRatioInput" min="1.0" max="2.0" value="1.2" step="0.1" class="w-full md:w-16 px-2 py-1 rounded border border-slate-300 text-sm">
                                 </div>
                             </div>
                         </div>
 
-                        <h4 class="text-md font-semibold text-slate-700 mt-4 mb-2">Background Box Settings (Geo-Data Only)</h4>
+                        <h4 class="text-md font-semibold text-slate-700 mt-4 mb-2">Background Box Settings</h4>
                         
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-4 items-center">
                             <div>
@@ -147,35 +192,34 @@
                             <div>
                                 <label for="backgroundOpacity" class="block text-sm font-medium text-slate-700 mb-1">Opacity</label>
                                 <div class="flex flex-col md:flex-row items-center gap-2">
-                                    <input type="range" id="backgroundOpacity" min="0.1" max="1.0" step="0.1" value="0" class="w-full md:w-2/3 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
-                                    <input type="number" id="backgroundOpacityInput" min="0.1" max="1.0" step="0.1" value="0" class="w-full md:w-16 px-2 py-1 rounded border border-slate-300 text-sm">
+                                    <input type="range" id="backgroundOpacity" min="0.1" max="1.0" step="0.1" value="0.5" class="w-full md:w-2/3 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                                    <input type="number" id="backgroundOpacityInput" min="0.1" max="1.0" step="0.1" value="0.5" class="w-full md:w-16 px-2 py-1 rounded border border-slate-300 text-sm">
                                 </div>
                             </div>
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-4 items-center mt-4">
                             <div>
-                                <label for="boxWidthRatio" class="block text-sm font-medium text-slate-700 mb-1">Box Width (px)</label>
+                                <label for="boxWidthPxInput" class="block text-sm font-medium text-slate-700 mb-1">Box Width (px)</label>
                                 <div class="flex flex-col md:flex-row items-center gap-2">
-                                    <input type="range" id="boxWidthRatio" min="10" max="100" value="0" step="10" class="w-full md:w-2/3 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
-                                    <input type="number" id="boxWidthPxInput" min="10" max="10000" value="0" step="1" class="w-full md:w-20 px-2 py-1 rounded border border-slate-300 text-sm">
-                                    <span id="boxWidthValue" class="ml-2 text-xs text-slate-500">0</span>
+                                    <input type="range" id="boxWidthRatio" min="10" max="300" value="200" step="10" class="w-full md:w-2/3 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                                    <input type="number" id="boxWidthPxInput" min="10" max="10000" value="200" step="1" class="w-full md:w-20 px-2 py-1 rounded border border-slate-300 text-sm">
                                 </div>
                             </div>
                             <div>
                                 <label for="verticalPadding" class="block text-sm font-medium text-slate-700 mb-1">Vertical Padding (px)</label>
                                 <div class="flex flex-col md:flex-row items-center gap-2">
-                                    <input type="range" id="verticalPadding" min="0" max="50" value="0" step="2" class="w-full md:w-2/3 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
-                                    <input type="number" id="verticalPaddingInput" min="0" max="50" value="0" step="2" class="w-full md:w-16 px-2 py-1 rounded border border-slate-300 text-sm">
+                                    <input type="range" id="verticalPadding" min="0" max="50" value="10" step="2" class="w-full md:w-2/3 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                                    <input type="number" id="verticalPaddingInput" min="0" max="50" value="10" step="2" class="w-full md:w-16 px-2 py-1 rounded border border-slate-300 text-sm">
                                 </div>
                             </div>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-4 items-center mt-4">
                             <div>
-                                <label for="boxHeightPxInput" class="block text-sm font-medium text-slate-700 mb-1">Box Height (px)</label>
+                                <label for="boxHeightPxInput" class="block text-sm font-medium text-slate-700 mb-1">Box Height (px) (0 for Auto)</label>
                                 <div class="flex flex-col md:flex-row items-center gap-2">
-                                    <input type="range" id="boxHeightPx" min="50" max="1000" value="0" step="10" class="w-full md:w-2/3 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
-                                    <input type="number" id="boxHeightPxInput" min="50" max="1000" value="0" step="10" class="w-full md:w-20 px-2 py-1 rounded border border-slate-300 text-sm">
+                                    <input type="range" id="boxHeightPx" min="0" max="500" value="0" step="10" class="w-full md:w-2/3 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                                    <input type="number" id="boxHeightPxInput" min="0" max="1000" value="0" step="10" class="w-full md:w-20 px-2 py-1 rounded border border-slate-300 text-sm">
                                 </div>
                             </div>
                         </div>
@@ -221,38 +265,51 @@
         const ctx = canvas.getContext('2d');
         const downloadBtn = document.getElementById('downloadBtn');
         const placeholderText = document.getElementById('placeholder-text');
+        const mainTitle = document.getElementById('mainTitle');
+        const geoErrorMsg = document.getElementById('geoErrorMsg');
+
+        // Mode specific containers
+        const geoTagFields = document.getElementById('geoTagModeFields');
+        const chainageFields = document.getElementById('chainageModeFields');
+        const modeRadios = document.querySelectorAll('input[name="watermarkMode"]');
+        
+        let currentMode = 'geoTag'; 
 
         // Input element references
         const latitudeInput = document.getElementById('latitude');
         const longitudeInput = document.getElementById('longitude');
         const elevationInput = document.getElementById('elevation');
         const accuracyInput = document.getElementById('accuracy');
-        const dateTimeInput = document.getElementById('dateTime');
         const noteInput = document.getElementById('note');
+        const chainageNumberInput = document.getElementById('chainageNumber'); // New input
         
+        // Date/Time Inputs
+        const dateInput = document.getElementById('dateInput'); // New
+        const timeInput = document.getElementById('timeInput'); // New
+        
+        const pickGeoBtn = document.getElementById('pickGeoBtn');
+        const pickDateTimeBtn = document.getElementById('pickDateTimeBtn'); // Renamed
+
+        // Style Input element references (for change listeners)
         const fontSizeInput = document.getElementById('fontSize');
-        const fontSizeValue = document.getElementById('fontSizeValue');
         const fontFamilyInput = document.getElementById('fontFamily');
         const textColorInput = document.getElementById('textColor');
         const backgroundOpacityInput = document.getElementById('backgroundOpacity');
-        const backgroundOpacityValue = document.getElementById('backgroundOpacityValue');
         const boxColorInput = document.getElementById('boxColor');
         const boxWidthRatioInput = document.getElementById('boxWidthRatio');
-        const boxWidthValue = document.getElementById('boxWidthValue');
         const lineSpacingRatioInput = document.getElementById('lineSpacingRatio');
-        const lineSpacingRatioValue = document.getElementById('lineSpacingRatioValue'); // Corrected ID
         const verticalPaddingInput = document.getElementById('verticalPadding');
-        const verticalPaddingValue = document.getElementById('verticalPaddingValue');
-        const positionControls = document.getElementById('positionControls'); // New control group
+        const positionControls = document.getElementById('positionControls');
+        const boxHeightPxSlider = document.getElementById('boxHeightPx');
 
-        // Add references for new manual inputs
+        // Number Input Boxes (for range/number sync)
         const fontSizeInputBox = document.getElementById('fontSizeInput');
         const lineSpacingRatioInputBox = document.getElementById('lineSpacingRatioInput');
         const backgroundOpacityInputBox = document.getElementById('backgroundOpacityInput');
         const boxWidthPxInput = document.getElementById('boxWidthPxInput');
         const verticalPaddingInputBox = document.getElementById('verticalPaddingInput');
         const boxHeightPxInput = document.getElementById('boxHeightPxInput');
-        const boxHeightPxSlider = document.getElementById('boxHeightPx');
+
 
         let originalImage = null;
         let imageFileName = 'watermarked-image.png';
@@ -260,7 +317,8 @@
 
         // List of all inputs for generic event listener setup
         const inputs = [
-            latitudeInput, longitudeInput, elevationInput, accuracyInput, dateTimeInput, noteInput, 
+            latitudeInput, longitudeInput, elevationInput, accuracyInput, dateInput, timeInput, noteInput, 
+            chainageNumberInput,
             fontSizeInput, fontFamilyInput, textColorInput, backgroundOpacityInput, boxColorInput, 
             boxWidthRatioInput, lineSpacingRatioInput, verticalPaddingInput
         ];
@@ -268,24 +326,60 @@
         // Event listeners for Controls (with Debouncing for performance)
         inputs.forEach(input => {
             input.addEventListener('input', () => {
-                // Update range value displays immediately
-                if(input.id === 'fontSize') { fontSizeValue.textContent = input.value; }
-                if(input.id === 'backgroundOpacity') { backgroundOpacityValue.textContent = input.value; }
-                if(input.id === 'lineSpacingRatio') { lineSpacingRatioValue.textContent = input.value; }
-                if(input.id === 'verticalPadding') { verticalPaddingValue.textContent = input.value; }
-                
                 if (originalImage) {
                     drawCanvas();
                 }
             });
         });
         
-        // Listener for the new Position radio buttons (also debounced)
+        // Listener for the new Position radio buttons 
         positionControls.addEventListener('change', () => {
              if (originalImage) {
                 drawCanvas();
             }
         });
+
+        // --- Mode Switching Logic ---
+        function updateModeUI(mode) {
+            currentMode = mode;
+            if (mode === 'geoTag') {
+                geoTagFields.classList.remove('hidden');
+                chainageFields.classList.add('hidden');
+                mainTitle.textContent = 'Geo-Tag Watermark Generator';
+            } else { // chainage mode
+                geoTagFields.classList.add('hidden');
+                chainageFields.classList.remove('hidden');
+                mainTitle.textContent = 'Chainage Watermark Generator';
+            }
+            // Redraw canvas if an image is loaded
+            if (originalImage) {
+                drawCanvas();
+            }
+        }
+
+        // Event listener for mode change
+        modeRadios.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                updateModeUI(e.target.value);
+            });
+        });
+
+        // Initialize UI state
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set initial value for sliders/inputs that had 0
+            fontSizeInput.value = 24;
+            fontSizeInputBox.value = 24;
+            lineSpacingRatioInput.value = 1.2;
+            lineSpacingRatioInputBox.value = 1.2;
+            backgroundOpacityInput.value = 0.5;
+            backgroundOpacityInputBox.value = 0.5;
+            boxWidthRatioInput.value = 200;
+            boxWidthPxInput.value = 200;
+            verticalPaddingInput.value = 10;
+            verticalPaddingInputBox.value = 10;
+            updateModeUI(currentMode); // Set initial view
+        });
+        // --- End Mode Switching Logic ---
 
 
         imageLoader.addEventListener('change', (e) => {
@@ -327,7 +421,7 @@
             return `${r},${g},${b}`;
         }
 
-        // Sync sliders and manual inputs with real-time updates, always use the number input value for rendering
+        // Utility: Sync sliders and manual inputs with real-time updates, always use the number input value for rendering
         function getStyleValue(slider, numberInput, fallbackMin, fallbackMax) {
             let val = parseFloat(numberInput.value);
             if (isNaN(val)) val = parseFloat(slider.value);
@@ -336,7 +430,7 @@
         }
 
         function drawWatermark() {
-            // Always use the number input value for rendering
+            // Get style values
             const fontSize = getStyleValue(fontSizeInput, fontSizeInputBox, 10, 60);
             const fontFamily = fontFamilyInput.value;
             const textColor = textColorInput.value;
@@ -346,33 +440,52 @@
             const lineSpacingRatio = getStyleValue(lineSpacingRatioInput, lineSpacingRatioInputBox, 1.0, 2.0);
             const verticalPadding = getStyleValue(verticalPaddingInput, verticalPaddingInputBox, 0, 50);
             const position = document.querySelector('input[name="position"]:checked').value;
-            const boxHeightPx = getStyleValue(boxHeightPxSlider, boxHeightPxInput, 50, 1000);
+            const boxHeightPx = getStyleValue(boxHeightPxSlider, boxHeightPxInput, 0, 1000); // 0 for auto
 
             const lineHeight = fontSize * lineSpacingRatio;
             const textPadding = 8;
+            let geoLines = [];
+            
+            const dateText = dateInput.value.trim();
+            const timeText = timeInput.value.trim();
+            const chainageText = chainageNumberInput.value.trim();
 
-            ctx.font = `bold ${fontSize}px ${fontFamily}`;
-            ctx.textBaseline = 'alphabetic';
+            // --- Generate text based on the selected mode ---
+            if (currentMode === 'geoTag') {
+                // Geo-Tag Mode: Latitude, Longitude, Elevation, Accuracy, Date, Time, Note
+                geoLines = [
+                    `Latitude: ${latitudeInput.value}`,
+                    `Longitude: ${longitudeInput.value}`,
+                    `Elevation: ${elevationInput.value}`,
+                    `Accuracy: ${accuracyInput.value}`,
+                ].filter(line => line.length > 0);
+                
+                // Add Date and Time on separate lines if present
+                if (dateText) geoLines.push(`Date: ${dateText}`);
+                if (timeText) geoLines.push(`Time: ${timeText}`);
 
-            const geoLines = [
-                `Latitude: ${latitudeInput.value}`,
-                `Longitude: ${longitudeInput.value}`,
-                `Elevation: ${elevationInput.value}`,
-                `Accuracy: ${accuracyInput.value}`,
-                `Time: ${dateTimeInput.value}`,
-            ].filter(line => line.length > 0);
+                const noteText = noteInput.value.trim();
+                if (noteText) {
+                    geoLines.push(`Note: ${noteText}`);
+                }
+            } else { 
+                // Chainage Mode: Date: {date}, Time: {time}, Chainage Number: {Chainage Number} (New Requested Order)
 
-            const noteText = noteInput.value.trim();
-            if (noteText) {
-                geoLines.push(`Note: ${noteText}`);
+                if (dateText) geoLines.push(`Date: ${dateText}`);
+                if (timeText) geoLines.push(`Time: ${timeText}`);
+                if (chainageText) geoLines.push(`Chainage Number: ${chainageText}`);
             }
+            // --- End text generation ---
+
+            if (geoLines.length === 0) return; // Nothing to draw
 
             const totalGeoLines = geoLines.length;
             const totalGeoContentHeight = totalGeoLines * lineHeight;
+            // If boxHeightPx is 0, calculate height based on content + padding, otherwise use fixed height
             const finalBoxHeight = boxHeightPx > 0 ? boxHeightPx : (totalGeoContentHeight + (verticalPadding * 2));
             const boxWidth = boxWidthPx;
 
-            // Place watermark box at the extreme corner (no outerPadding)
+            // Place watermark box at the extreme corner
             let backgroundX;
             let backgroundY;
 
@@ -388,29 +501,44 @@
                 backgroundY = 0;
             }
 
-            if (totalGeoLines > 0) {
-                ctx.fillStyle = `rgba(${boxColorRgb}, ${backgroundOpacity})`;
-                ctx.fillRect(backgroundX, backgroundY, boxWidth, finalBoxHeight);
+            // 1. Draw Background Box
+            ctx.fillStyle = `rgba(${boxColorRgb}, ${backgroundOpacity})`;
+            ctx.fillRect(backgroundX, backgroundY, boxWidth, finalBoxHeight);
 
-                ctx.save();
-                ctx.fillStyle = textColor;
-                ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
-                ctx.shadowBlur = 5;
-                ctx.shadowOffsetX = 2;
-                ctx.shadowOffsetY = 2;
+            // 2. Draw Text
+            ctx.font = `bold ${fontSize}px ${fontFamily}`;
+            ctx.textBaseline = 'alphabetic';
 
-                ctx.textAlign = position.includes('L') ? 'left' : 'right';
-                const textX = position.includes('L') ? backgroundX + textPadding : backgroundX + boxWidth - textPadding;
+            ctx.save();
+            ctx.fillStyle = textColor;
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+            ctx.shadowBlur = 5;
+            ctx.shadowOffsetX = 2;
+            ctx.shadowOffsetY = 2;
 
-                let y = backgroundY + verticalPadding + (lineHeight * 0.4);
+            ctx.textAlign = position.includes('L') ? 'left' : 'right';
+            const textX = position.includes('L') ? backgroundX + textPadding : backgroundX + boxWidth - textPadding;
 
-                geoLines.forEach(line => {
-                    ctx.fillText(line, textX, y);
-                    y += lineHeight;
-                });
-
-                ctx.restore();
+            // Calculate start Y for centered text, considering lineHeight to align to baseline
+            let yStart = backgroundY + verticalPadding;
+            
+            // Adjust yStart if boxHeightPx is fixed and larger than content to center the text block vertically
+            if (boxHeightPx > 0) {
+                const availableHeight = boxHeightPx - (verticalPadding * 2);
+                const contentBlockHeight = totalGeoContentHeight;
+                const offset = (availableHeight - contentBlockHeight) / 2;
+                yStart += offset;
             }
+
+            // Correct for baseline difference (start Y should be where the first line's baseline is)
+            let y = yStart + (lineHeight * 0.75); // Rough baseline approximation
+
+            geoLines.forEach(line => {
+                ctx.fillText(line, textX, y);
+                y += lineHeight;
+            });
+
+            ctx.restore();
         }
         
         downloadBtn.addEventListener('click', () => {
@@ -425,83 +553,85 @@
         });
 
         // Utility: sync slider and input, always use input value for rendering
-        function syncSliderInput(slider, input, min, max, callback) {
+        function syncSliderInput(slider, input, min, max) {
             slider.addEventListener('input', () => {
                 input.value = slider.value;
-                callback && callback();
+                if (originalImage) drawCanvas();
             });
             input.addEventListener('input', () => {
                 let val = Math.max(min, Math.min(max, parseFloat(input.value) || min));
                 input.value = val;
                 slider.value = val;
-                callback && callback();
+                if (originalImage) drawCanvas();
             });
         }
 
         // Sync all style controls
-        syncSliderInput(fontSizeInput, fontSizeInputBox, 10, 60, () => originalImage && drawCanvas());
-        syncSliderInput(lineSpacingRatioInput, lineSpacingRatioInputBox, 1.0, 2.0, () => originalImage && drawCanvas());
-        syncSliderInput(backgroundOpacityInput, backgroundOpacityInputBox, 0.1, 1.0, () => originalImage && drawCanvas());
-        syncSliderInput(verticalPaddingInput, verticalPaddingInputBox, 0, 50, () => originalImage && drawCanvas());
-        syncSliderInput(boxWidthRatioInput, boxWidthPxInput, 10, 10000, () => originalImage && drawCanvas());
-        syncSliderInput(boxHeightPxSlider, boxHeightPxInput, 50, 1000, () => originalImage && drawCanvas());
+        syncSliderInput(fontSizeInput, fontSizeInputBox, 10, 60);
+        syncSliderInput(lineSpacingRatioInput, lineSpacingRatioInputBox, 1.0, 2.0);
+        syncSliderInput(backgroundOpacityInput, backgroundOpacityInputBox, 0.1, 1.0);
+        syncSliderInput(verticalPaddingInput, verticalPaddingInputBox, 0, 50);
+        syncSliderInput(boxWidthRatioInput, boxWidthPxInput, 10, 10000);
+        syncSliderInput(boxHeightPxSlider, boxHeightPxInput, 0, 1000); // Updated min to 0
 
         // Real-time update for select, color, and text fields
-        [fontFamilyInput, textColorInput, boxColorInput, noteInput].forEach(el =>
+        [fontFamilyInput, textColorInput, boxColorInput, noteInput, chainageNumberInput, dateInput, timeInput].forEach(el =>
             el.addEventListener('input', () => { if (originalImage) drawCanvas(); })
         );
 
         // Geo/time buttons
-        const pickGeoBtn = document.getElementById('pickGeoBtn');
-        const pickTimeBtn = document.getElementById('pickTimeBtn');
-
+        
         pickGeoBtn.addEventListener('click', () => {
+            if (currentMode === 'chainage') return; // Only active in Geo-Tag Mode
+
             if (!navigator.geolocation) {
-                alert('Geolocation is not supported by your browser.');
+                console.error('Geolocation is not supported by your browser.');
+                geoErrorMsg.textContent = 'Geolocation not supported.';
+                geoErrorMsg.classList.remove('hidden');
                 return;
             }
+            geoErrorMsg.classList.add('hidden');
             pickGeoBtn.textContent = 'Picking...';
             navigator.geolocation.getCurrentPosition(
                 pos => {
                     latitudeInput.value = pos.coords.latitude.toFixed(6);
                     longitudeInput.value = pos.coords.longitude.toFixed(6);
+                    // Reset elevation/accuracy placeholders based on available data
+                    elevationInput.value = pos.coords.altitude !== null ? `${pos.coords.altitude.toFixed(1)} m` : 'N/A';
+                    accuracyInput.value = pos.coords.accuracy !== null ? `${pos.coords.accuracy.toFixed(1)} m` : 'N/A';
+
                     pickGeoBtn.textContent = 'Pick Automatically';
                     if (originalImage) drawCanvas();
                 },
-                () => {
-                    alert('Unable to retrieve location.');
+                (error) => {
+                    console.error('Geolocation error:', error);
+                    let message = 'Unable to retrieve location.';
+                    if (error.code === error.PERMISSION_DENIED) {
+                        message = 'Permission denied. Please allow location access.';
+                    } else if (error.code === error.POSITION_UNAVAILABLE) {
+                        message = 'Location unavailable.';
+                    }
+                    geoErrorMsg.textContent = message;
+                    geoErrorMsg.classList.remove('hidden');
                     pickGeoBtn.textContent = 'Pick Automatically';
                 }
             );
         });
 
-        pickTimeBtn.addEventListener('click', () => {
+        // Function to handle picking current date and time
+        pickDateTimeBtn.addEventListener('click', () => {
             const now = new Date();
             const pad = n => n.toString().padStart(2, '0');
-            dateTimeInput.value = `${pad(now.getDate())}-${pad(now.getMonth()+1)}-${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+            
+            const dateStr = `${pad(now.getDate())}-${pad(now.getMonth()+1)}-${now.getFullYear()}`;
+            const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+
+            dateInput.value = dateStr;
+            timeInput.value = timeStr;
+            
             if (originalImage) drawCanvas();
         });
-
-        imageLoader.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            imageFileName = file.name.replace(/(\.[\w\d_-]+)$/i, '_watermarked$1');
-            const reader = new FileReader();
-
-            reader.onload = (event) => {
-                originalImage = new Image();
-                originalImage.onload = () => {
-                    placeholderText.style.display = 'none';
-                    canvas.style.display = 'block';
-                    drawCanvas();
-                    downloadBtn.disabled = false;
-                };
-                originalImage.src = event.target.result;
-            };
-
-            reader.readAsDataURL(file);
-        });
+        
     </script>
 </body>
 </html>
