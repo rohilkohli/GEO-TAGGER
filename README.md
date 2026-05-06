@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <em>Dark mode Interface (left) and Light Mode (right)</em>
+  <em>Dark mode Interface (left) and Light Mode Interface (right)</em>
 </p>
 
 </div>
@@ -113,23 +113,6 @@ GEO-TAGGER/
 ```
 
 The app intentionally lives in a **single self-contained file** — making it trivially easy to host on GitHub Pages, share as an attachment, or embed anywhere.
-
----
-
-## 💡 Suggested Improvements
-
-These are features that would make GEO-TAGGER even more powerful:
-
-- [x] **Drag-and-drop upload zone** — drop images directly onto the preview area *(already live)*
-- [ ] **Batch processing** — watermark multiple images at once
-- [ ] **Logo/icon overlay** — add a company logo alongside the text watermark
-- [ ] **QR code embedding** — encode GPS coordinates as a scannable QR code
-- [ ] **EXIF data reader** — auto-populate lat/lon from image EXIF metadata
-- [ ] **Preset saving** — save and recall watermark style presets via `localStorage`
-- [ ] **Watermark opacity** — independent opacity slider for the text layer
-- [ ] **Copy-to-clipboard** — copy the watermarked image to clipboard directly
-- [ ] **Dark/Light theme toggle** — separate from the watermark styling
-- [ ] **Keyboard shortcuts** — `Ctrl+D` to download, `Ctrl+L` to pick location
 
 ---
 
