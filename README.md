@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <em>Main Interface (left) and Watermark Output (right)</em>
+  <em>Dark mode Interface (left) and Light Mode (right)</em>
 </p>
 
 </div>
