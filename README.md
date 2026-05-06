@@ -90,7 +90,7 @@ Enter a **Chainage Number** in any format (e.g. `CH 0+500`, `C123+45.67`). Add a
 | Text Colour | Any hex colour | `#FFFFFF` |
 | Line Spacing | 1.0 × – 2.0 × | 1.2 × |
 | Box Colour | Any hex colour | `#000000` |
-| Box Opacity | 10 % – 100 % | 50 % |
+| Box Opacity | 10% – 100% | 50% |
 | Box Width | 10 – 10 000 px | 200 px |
 | Box Height | 0 (auto) – 1000 px | 0 (auto) |
 | Vertical Padding | 0 – 50 px | 10 px |
@@ -114,7 +114,7 @@ The app intentionally lives in a **single self-contained file** — making it tr
 
 These are features that would make GEO-TAGGER even more powerful:
 
-- [ ] **Drag-and-drop upload zone** — drop images directly onto the preview area
+- [x] **Drag-and-drop upload zone** — drop images directly onto the preview area *(already live)*
 - [ ] **Batch processing** — watermark multiple images at once
 - [ ] **Logo/icon overlay** — add a company logo alongside the text watermark
 - [ ] **QR code embedding** — encode GPS coordinates as a scannable QR code
