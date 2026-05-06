@@ -12,8 +12,14 @@
 > **Stamp precise geo-location or chainage data directly onto your images — fully customisable, entirely in-browser. Zero uploads, zero servers, zero tracking.**
 
 ---
+<p align="center">
+  <img src="https://raw.githubusercontent.com/rohilkohli/GEO-TAGGER/main/Screenshot_6-5-2026_132458_rohilkohli.github.io.jpeg" width="400" alt="Main Interface">
+  <img src="https://raw.githubusercontent.com/rohilkohli/GEO-TAGGER/main/Screenshot_6-5-2026_132746_rohilkohli.github.io.jpeg" width="400" alt="Watermark Output">
+</p>
 
-![GEO-TAGGER Screenshot](https://raw.githubusercontent.com/rohilkohli/GEO-TAGGER/main/screenshot.png)
+<p align="center">
+  <em>Main Interface (left) and Watermark Output (right)</em>
+</p>
 
 </div>
 
