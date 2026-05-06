@@ -1346,7 +1346,7 @@
                 const logoSize = getStyleValue(logoSizeSlider, logoSizeInputBox, 20, 200);
                 const logoPad = 10;
                 const logoPos = logoPositionSelect.value;
-                const logoX = logoPos.includes('L') ? logoPad : tCanvas.width  - logoSize - logoPad;
+                const logoX = logoPos.includes('L') ? logoPad : tCanvas.width - logoSize - logoPad;
                 const logoY = logoPos.includes('B') ? tCanvas.height - logoSize - logoPad : logoPad;
                 tCtx.save();
                 tCtx.globalAlpha = 0.9;
@@ -1364,7 +1364,7 @@
                     try {
                         const qrEl = await getQRCanvas(qrText, qrSize);
                         // Place QR in the corner opposite the watermark
-                        const qrX = position.includes('L') ? tCanvas.width  - qrEl.width  : 0;
+                        const qrX = position.includes('L') ? tCanvas.width - qrEl.width : 0;
                         const qrY = position.includes('B') ? tCanvas.height - qrEl.height : 0;
                         tCtx.drawImage(qrEl, qrX, qrY);
                     } catch (e) {
@@ -1581,10 +1581,10 @@
             if (p.textOpacity != null) { textOpacitySlider.value = p.textOpacity; textOpacityInputBox.value = p.textOpacity; }
             backgroundOpacityInput.value    = p.backgroundOpacity; backgroundOpacityInputBox.value = p.backgroundOpacity;
             boxColorInput.value       = p.boxColor;
-            boxWidthRatioInput.value  = Math.min(300, p.boxWidth); boxWidthPxInput.value    = p.boxWidth;
-            boxHeightPxSlider.value   = Math.min(500, p.boxHeight); boxHeightPxInput.value  = p.boxHeight;
+            boxWidthRatioInput.value  = p.boxWidth;  boxWidthPxInput.value    = p.boxWidth;
+            boxHeightPxSlider.value   = p.boxHeight; boxHeightPxInput.value   = p.boxHeight;
             lineSpacingRatioInput.value = p.lineSpacing; lineSpacingRatioInputBox.value = p.lineSpacing;
-            verticalPaddingInput.value  = Math.min(50, p.verticalPadding); verticalPaddingInputBox.value = p.verticalPadding;
+            verticalPaddingInput.value  = p.verticalPadding; verticalPaddingInputBox.value = p.verticalPadding;
             const r = document.querySelector(`input[name="position"][value="${p.position}"]`);
             if (r) r.checked = true;
             if (originalImage) drawCanvas();
@@ -1710,7 +1710,7 @@
                         reader.onload = ev => {
                             const img = new Image();
                             img.onload = async () => {
-                                offCanvas.width  = img.width;
+                                offCanvas.width = img.width;
                                 offCanvas.height = img.height;
                                 offCtx.drawImage(img, 0, 0);
                                 await drawWatermark(offCanvas, offCtx, img);
