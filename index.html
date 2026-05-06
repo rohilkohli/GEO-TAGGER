@@ -7,6 +7,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Roboto+Mono:wght@400;700&family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/exifr@7.1.3/dist/lite.umd.cjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -547,6 +550,183 @@
             transition: opacity 0.25s;
         }
         #chainageModeFields.hidden, #geoTagModeFields.hidden { display: none; }
+
+        /* ── Light Theme ─────────────────────────────────────────── */
+        [data-theme="light"] body { background: #f0f4ff; color: #1e293b; }
+        [data-theme="light"] .orb { opacity: 0.10; }
+        [data-theme="light"] .glass {
+            background: linear-gradient(135deg, rgba(255,255,255,0.88) 0%, rgba(255,255,255,0.72) 100%);
+            border-color: rgba(99,102,241,0.18);
+            box-shadow: 0 8px 32px rgba(99,102,241,0.1), 0 0 0 1px rgba(99,102,241,0.06), inset 0 1px 0 rgba(255,255,255,0.9);
+        }
+        [data-theme="light"] .glass::before { background: none; }
+        [data-theme="light"] .glass-input {
+            background: rgba(0,0,0,0.04);
+            border-color: rgba(0,0,0,0.14);
+            color: #1e293b;
+        }
+        [data-theme="light"] .glass-input:focus {
+            background: rgba(99,102,241,0.05);
+            border-color: rgba(99,102,241,0.45);
+        }
+        [data-theme="light"] .glass-input::placeholder { color: rgba(30,41,59,0.35); }
+        [data-theme="light"] .glass-input option { background: #fff; color: #1e293b; }
+        [data-theme="light"] h1.main-title {
+            background: linear-gradient(135deg, #4338ca 0%, #7c3aed 50%, #0891b2 100%);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        [data-theme="light"] .subtitle { color: rgba(30,41,59,0.6); }
+        [data-theme="light"] .badge { background: rgba(99,102,241,0.1); border-color: rgba(99,102,241,0.25); color: #6366f1; }
+        [data-theme="light"] .section-title { color: rgba(99,102,241,0.85); }
+        [data-theme="light"] .section-title::after { background: linear-gradient(90deg, rgba(99,102,241,0.2), transparent); }
+        [data-theme="light"] .panel-heading { color: #1e293b; }
+        [data-theme="light"] .sub-heading { color: rgba(79,70,229,0.85); }
+        [data-theme="light"] .upload-text { color: rgba(30,41,59,0.6); }
+        [data-theme="light"] .upload-text strong { color: #6366f1; }
+        [data-theme="light"] .upload-zone { border-color: rgba(99,102,241,0.25); background: rgba(99,102,241,0.03); }
+        [data-theme="light"] .upload-zone:hover { border-color: rgba(99,102,241,0.5); background: rgba(99,102,241,0.07); }
+        [data-theme="light"] .form-group label { color: rgba(30,41,59,0.7); }
+        [data-theme="light"] .mode-toggle { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.1); }
+        [data-theme="light"] .mode-label { color: rgba(30,41,59,0.6); }
+        [data-theme="light"] .mode-toggle input[type="radio"]:checked + .mode-label { background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.12)); color: #4338ca; }
+        [data-theme="light"] .btn-ghost { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.12); color: rgba(30,41,59,0.75); }
+        [data-theme="light"] .btn-ghost:hover { background: rgba(99,102,241,0.08); border-color: rgba(99,102,241,0.3); color: #4338ca; }
+        [data-theme="light"] .num-input { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.12); color: #1e293b; }
+        [data-theme="light"] input[type="range"] { background: rgba(0,0,0,0.1); }
+        [data-theme="light"] #positionControls label { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.1); color: rgba(30,41,59,0.7); }
+        [data-theme="light"] #positionControls label:has(input:checked) { background: rgba(99,102,241,0.1); border-color: rgba(99,102,241,0.35); color: #4338ca; }
+        [data-theme="light"] .divider { background: linear-gradient(90deg, transparent, rgba(0,0,0,0.08), transparent); }
+        [data-theme="light"] .error-msg { color: #dc2626; }
+        [data-theme="light"] #placeholder-text { color: rgba(30,41,59,0.35); }
+        [data-theme="light"] footer { color: rgba(30,41,59,0.4); }
+        [data-theme="light"] footer a { color: rgba(79,70,229,0.65); }
+        [data-theme="light"] ::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.25); }
+
+        /* ── Theme Toggle Button ──────────────────────────────────── */
+        .theme-toggle-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1.5rem;
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.14);
+            color: rgba(200,210,240,0.8);
+            border-radius: 10px;
+            padding: 0.4rem 0.8rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.22s;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            z-index: 10;
+            letter-spacing: 0.01em;
+        }
+        .theme-toggle-btn:hover { background: rgba(99,102,241,0.15); border-color: rgba(99,102,241,0.4); color: #c7d2fe; }
+        [data-theme="light"] .theme-toggle-btn { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.12); color: rgba(30,41,59,0.75); }
+        [data-theme="light"] .theme-toggle-btn:hover { background: rgba(99,102,241,0.08); border-color: rgba(99,102,241,0.3); color: #4338ca; }
+
+        /* ── Toggle Switch ───────────────────────────────────────── */
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 0.82rem;
+            color: rgba(200,210,240,0.75);
+            cursor: pointer;
+            user-select: none;
+        }
+        [data-theme="light"] .toggle-row { color: rgba(30,41,59,0.7); }
+        .toggle-switch { position: relative; width: 36px; height: 20px; flex-shrink: 0; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+        .toggle-slider {
+            position: absolute; inset: 0;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 999px;
+            transition: all 0.25s;
+        }
+        [data-theme="light"] .toggle-slider { background: rgba(0,0,0,0.1); border-color: rgba(0,0,0,0.15); }
+        .toggle-slider::before {
+            content: '';
+            position: absolute;
+            width: 14px; height: 14px;
+            border-radius: 50%;
+            background: rgba(200,210,240,0.55);
+            left: 2px; top: 50%;
+            transform: translateY(-50%);
+            transition: all 0.25s;
+        }
+        .toggle-switch input:checked + .toggle-slider { background: rgba(99,102,241,0.45); border-color: rgba(99,102,241,0.55); }
+        .toggle-switch input:checked + .toggle-slider::before { transform: translateX(16px) translateY(-50%); background: #818cf8; }
+        .qr-options { margin-top: 0.6rem; }
+        .qr-options.hidden { display: none; }
+
+        /* ── Logo Preview ────────────────────────────────────────── */
+        .logo-row { display: flex; align-items: center; gap: 0.65rem; }
+        .logo-preview {
+            width: 44px; height: 44px;
+            border-radius: 8px;
+            object-fit: contain;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            display: none;
+            flex-shrink: 0;
+        }
+        [data-theme="light"] .logo-preview { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.1); }
+
+        /* ── Preset Chips ────────────────────────────────────────── */
+        #presetsList { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem; min-height: 24px; }
+        .preset-chip {
+            display: inline-flex; align-items: center; gap: 0.3rem;
+            background: rgba(99,102,241,0.1);
+            border: 1px solid rgba(99,102,241,0.25);
+            border-radius: 8px;
+            padding: 0.3rem 0.55rem;
+            font-size: 0.74rem;
+            color: rgba(200,210,240,0.85);
+        }
+        [data-theme="light"] .preset-chip { background: rgba(99,102,241,0.08); border-color: rgba(99,102,241,0.2); color: rgba(30,41,59,0.8); }
+        .preset-chip span { max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .preset-load-btn, .preset-del-btn {
+            background: none; border: none; cursor: pointer;
+            font-family: inherit; font-size: 0.9rem; padding: 0 1px;
+            transition: color 0.15s; line-height: 1;
+            color: rgba(165,180,252,0.7);
+        }
+        .preset-load-btn:hover { color: #a5b4fc; }
+        .preset-del-btn:hover { color: #f87171; }
+        [data-theme="light"] .preset-load-btn { color: rgba(99,102,241,0.65); }
+        [data-theme="light"] .preset-load-btn:hover { color: #6366f1; }
+
+        /* ── Button Row ──────────────────────────────────────────── */
+        .btn-row { display: grid; grid-template-columns: 1fr auto; gap: 0.6rem; align-items: stretch; }
+        .btn-copy {
+            padding: 0.9rem 0.7rem;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            color: rgba(200,210,240,0.8);
+            border-radius: 14px;
+            font-size: 0.78rem; font-weight: 600;
+            cursor: pointer; transition: all 0.22s;
+            font-family: inherit;
+            display: inline-flex; align-items: center; gap: 0.35rem;
+            white-space: nowrap;
+        }
+        .btn-copy:hover:not(:disabled) { background: rgba(99,102,241,0.12); border-color: rgba(99,102,241,0.35); color: #c7d2fe; }
+        .btn-copy:disabled { opacity: 0.35; cursor: not-allowed; }
+        [data-theme="light"] .btn-copy { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.12); color: rgba(30,41,59,0.75); }
+        [data-theme="light"] .btn-copy:hover:not(:disabled) { background: rgba(99,102,241,0.08); border-color: rgba(99,102,241,0.3); color: #4338ca; }
+
+        /* ── Batch Panel ─────────────────────────────────────────── */
+        .batch-panel { margin-top: 1.5rem; }
+        .batch-grid { display: grid; grid-template-columns: 1fr auto; gap: 1rem; align-items: start; }
+        @media (max-width: 600px) { .batch-grid { grid-template-columns: 1fr; } }
+        .batch-file-info { font-size: 0.78rem; color: rgba(165,180,252,0.8); margin-top: 0.4rem; }
+        [data-theme="light"] .batch-file-info { color: rgba(99,102,241,0.75); }
+        #batchDownloadBtn { max-width: 200px; }
+        @media (max-width: 600px) { #batchDownloadBtn { max-width: 100%; } }
     </style>
 </head>
 <body>
@@ -561,6 +741,8 @@
     </div>
 
     <div class="page-wrapper">
+
+        <button id="themeToggleBtn" class="theme-toggle-btn" title="Toggle light/dark theme">☀️ Light Mode</button>
 
         <!-- ── Header ─────────────────────────────────────────────── -->
         <header>
@@ -715,6 +897,13 @@
                                 <input type="number" id="lineSpacingRatioInput" min="1.0" max="2.0" value="1.2" step="0.1" class="num-input">
                             </div>
                         </div>
+                        <div class="form-group col-span-2">
+                            <label for="textOpacityInput">Text Opacity</label>
+                            <div class="slider-row">
+                                <input type="range" id="textOpacity" min="0.05" max="1.0" step="0.05" value="1.0">
+                                <input type="number" id="textOpacityInput" min="0.05" max="1.0" step="0.05" value="1.0" class="num-input">
+                            </div>
+                        </div>
                     </div>
 
                     <div class="sub-heading">Box Settings</div>
@@ -765,10 +954,83 @@
 
                     <div class="divider"></div>
 
-                    <!-- Download -->
-                    <button id="downloadBtn" class="btn btn-primary" disabled>
-                        ⬇ Download Watermarked Image
-                    </button>
+                    <!-- 5. Extras -->
+                    <div class="section-title">Step 5 — Extras</div>
+
+                    <!-- Logo Overlay -->
+                    <div class="form-group">
+                        <label>Logo Overlay <span style="font-weight:400;opacity:0.55;">(optional)</span></label>
+                        <div class="logo-row">
+                            <div class="upload-zone" style="flex:1;padding:0.65rem;min-height:unset;">
+                                <input type="file" id="logoLoader" accept="image/*">
+                                <div class="upload-text" style="font-size:0.75rem;"><strong>Upload logo</strong> image</div>
+                            </div>
+                            <img id="logoPreview" class="logo-preview" alt="Logo preview">
+                            <button id="clearLogoBtn" type="button" class="btn btn-ghost" style="display:none;width:auto;padding:0.4rem 0.6rem;font-size:0.85rem;" title="Remove logo">✕</button>
+                        </div>
+                    </div>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label for="logoPosition">Logo Position</label>
+                            <select id="logoPosition" class="glass-input">
+                                <option value="TL">Top-Left</option>
+                                <option value="TR" selected>Top-Right</option>
+                                <option value="BL">Bottom-Left</option>
+                                <option value="BR">Bottom-Right</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="logoSizeInput">Logo Size (px)</label>
+                            <div class="slider-row">
+                                <input type="range" id="logoSize" min="20" max="200" value="60" step="5">
+                                <input type="number" id="logoSizeInput" min="20" max="200" value="60" step="5" class="num-input">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- QR Code -->
+                    <div class="form-group" id="qrCodeGroup">
+                        <label class="toggle-row">
+                            <span class="toggle-switch">
+                                <input type="checkbox" id="qrCodeToggle">
+                                <span class="toggle-slider"></span>
+                            </span>
+                            <span>Embed QR Code (GPS coordinates)</span>
+                        </label>
+                        <div class="qr-options hidden" id="qrOptions">
+                            <div style="margin-top:0.5rem;">
+                                <label for="qrSizeInput" style="display:block;font-size:0.78rem;font-weight:600;color:rgba(200,210,240,0.7);margin-bottom:0.35rem;">QR Size (px)</label>
+                                <div class="slider-row">
+                                    <input type="range" id="qrSize" min="60" max="200" value="100" step="10">
+                                    <input type="number" id="qrSizeInput" min="60" max="200" value="100" step="10" class="num-input">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <!-- Presets -->
+                    <div class="section-title">Presets</div>
+                    <div class="form-group">
+                        <div class="slider-row" style="gap:0.5rem;">
+                            <input type="text" id="presetNameInput" class="glass-input" placeholder="Preset name…" style="flex:1;">
+                            <button id="savePresetBtn" type="button" class="btn btn-ghost" style="width:auto;white-space:nowrap;padding:0.55rem 0.9rem;">💾 Save</button>
+                        </div>
+                    </div>
+                    <div id="presetsList"></div>
+
+                    <div class="divider"></div>
+
+                    <!-- Download + Copy -->
+                    <div class="btn-row">
+                        <button id="downloadBtn" class="btn btn-primary" disabled>
+                            ⬇ Download Watermarked Image
+                        </button>
+                        <button id="copyBtn" class="btn-copy" disabled title="Copy to clipboard (PNG)">
+                            📋 Copy
+                        </button>
+                    </div>
 
                 </div>
             </div>
@@ -785,6 +1047,27 @@
             </div>
 
         </main>
+
+        <!-- ── Batch Processing ───────────────────────────────────── -->
+        <div class="glass batch-panel">
+            <div class="glass-inner" style="padding:1.5rem;">
+                <div class="section-title">Batch Processing</div>
+                <p style="font-size:0.82rem;color:rgba(200,210,240,0.5);margin-bottom:1rem;line-height:1.6;">Watermark multiple images at once with the current settings. All files are processed in-browser and downloaded as a ZIP.</p>
+                <div class="batch-grid">
+                    <div>
+                        <div class="upload-zone" id="batchUploadZone">
+                            <input type="file" id="batchLoader" accept="image/*" multiple>
+                            <span class="upload-icon" style="font-size:1.6rem;">🖼️</span>
+                            <div class="upload-text"><strong>Select multiple images</strong> for batch watermarking</div>
+                        </div>
+                        <div class="batch-file-info" id="batchFileCount">No files selected</div>
+                    </div>
+                    <button id="batchDownloadBtn" type="button" class="btn btn-primary" disabled>
+                        ⬇ Download All as ZIP
+                    </button>
+                </div>
+            </div>
+        </div>
 
         <footer>
             <p>&copy; <a href="https://github.com/rohilkohli" target="_blank" rel="noopener">Rohil Kohli</a> 2025 · All rights reserved · <a href="README.md">Docs</a></p>
@@ -920,6 +1203,10 @@
             if (!file) return;
 
             imageFileName = file.name.replace(/(\.[\w\d_-]+)$/i, '_watermarked$1');
+
+            // Try EXIF GPS auto-populate (async, fire-and-forget)
+            if (currentMode === 'geoTag') tryReadExif(file);
+
             const reader = new FileReader();
 
             reader.onload = (event) => {
@@ -929,6 +1216,7 @@
                     canvas.style.display = 'block';
                     drawCanvas();
                     downloadBtn.disabled = false;
+                    copyBtn.disabled = false;
                 };
                 originalImage.src = event.target.result;
             };
@@ -936,14 +1224,17 @@
             reader.readAsDataURL(file);
         });
 
-        function drawCanvas() {
-            if (!originalImage) return;
-            
-            canvas.width = originalImage.width;
-            canvas.height = originalImage.height;
-            ctx.drawImage(originalImage, 0, 0);
-            
-            drawWatermark();
+        async function drawCanvas(targetCanvas, targetCtx, targetImage) {
+            const tCanvas = targetCanvas || canvas;
+            const tCtx    = targetCtx    || ctx;
+            const tImage  = targetImage  || originalImage;
+            if (!tImage) return;
+
+            tCanvas.width  = tImage.width;
+            tCanvas.height = tImage.height;
+            tCtx.drawImage(tImage, 0, 0);
+
+            await drawWatermark(tCanvas, tCtx, tImage);
         }
 
         function hexToRgb(hex) {
@@ -962,116 +1253,125 @@
             return val;
         }
 
-        function drawWatermark() {
+        async function drawWatermark(tCanvas, tCtx, tImage) {
             // Get style values
             const fontSize = getStyleValue(fontSizeInput, fontSizeInputBox, 10, 60);
             const fontFamily = fontFamilyInput.value;
             const textColor = textColorInput.value;
             const boxColorRgb = hexToRgb(boxColorInput.value);
             const backgroundOpacity = getStyleValue(backgroundOpacityInput, backgroundOpacityInputBox, 0.1, 1.0);
-            const boxWidthPx = getStyleValue(boxWidthRatioInput, boxWidthPxInput, 10, originalImage.width);
+            const textOpacity = getStyleValue(textOpacitySlider, textOpacityInputBox, 0.05, 1.0);
+            const boxWidthPx = getStyleValue(boxWidthRatioInput, boxWidthPxInput, 10, tImage.width);
             const lineSpacingRatio = getStyleValue(lineSpacingRatioInput, lineSpacingRatioInputBox, 1.0, 2.0);
             const verticalPadding = getStyleValue(verticalPaddingInput, verticalPaddingInputBox, 0, 50);
             const position = document.querySelector('input[name="position"]:checked').value;
-            const boxHeightPx = getStyleValue(boxHeightPxSlider, boxHeightPxInput, 0, 1000); // 0 for auto
+            const boxHeightPx = getStyleValue(boxHeightPxSlider, boxHeightPxInput, 0, 1000);
 
             const lineHeight = fontSize * lineSpacingRatio;
             const textPadding = 8;
             let geoLines = [];
-            
+
             const dateText = dateInput.value.trim();
             const timeText = timeInput.value.trim();
             const chainageText = chainageNumberInput.value.trim();
 
-            // --- Generate text based on the selected mode ---
             if (currentMode === 'geoTag') {
-                // Geo-Tag Mode: Latitude, Longitude, Elevation, Accuracy, Date, Time, Note
                 geoLines = [
                     `Latitude: ${latitudeInput.value}`,
                     `Longitude: ${longitudeInput.value}`,
                     `Elevation: ${elevationInput.value}`,
                     `Accuracy: ${accuracyInput.value}`,
                 ].filter(line => line.length > 0);
-                
-                // Add Date and Time on separate lines if present
                 if (dateText) geoLines.push(`Date: ${dateText}`);
                 if (timeText) geoLines.push(`Time: ${timeText}`);
-
                 const noteText = noteInput.value.trim();
-                if (noteText) {
-                    geoLines.push(`Note: ${noteText}`);
-                }
-            } else { 
-                // Chainage Mode: Date: {date}, Time: {time}, Chainage Number: {Chainage Number} (New Requested Order)
-
+                if (noteText) geoLines.push(`Note: ${noteText}`);
+            } else {
                 if (dateText) geoLines.push(`Date: ${dateText}`);
                 if (timeText) geoLines.push(`Time: ${timeText}`);
                 if (chainageText) geoLines.push(`Chainage Number: ${chainageText}`);
             }
-            // --- End text generation ---
 
-            if (geoLines.length === 0) return; // Nothing to draw
+            if (geoLines.length === 0) return;
 
             const totalGeoLines = geoLines.length;
             const totalGeoContentHeight = totalGeoLines * lineHeight;
-            // If boxHeightPx is 0, calculate height based on content + padding, otherwise use fixed height
             const finalBoxHeight = boxHeightPx > 0 ? boxHeightPx : (totalGeoContentHeight + (verticalPadding * 2));
             const boxWidth = boxWidthPx;
 
-            // Place watermark box at the extreme corner
-            let backgroundX;
-            let backgroundY;
-
+            let backgroundX, backgroundY;
             if (position.includes('L')) {
                 backgroundX = 0;
             } else {
-                backgroundX = canvas.width - boxWidth;
+                backgroundX = tCanvas.width - boxWidth;
             }
-
             if (position.includes('B')) {
-                backgroundY = canvas.height - finalBoxHeight;
+                backgroundY = tCanvas.height - finalBoxHeight;
             } else {
                 backgroundY = 0;
             }
 
             // 1. Draw Background Box
-            ctx.fillStyle = `rgba(${boxColorRgb}, ${backgroundOpacity})`;
-            ctx.fillRect(backgroundX, backgroundY, boxWidth, finalBoxHeight);
+            tCtx.fillStyle = `rgba(${boxColorRgb}, ${backgroundOpacity})`;
+            tCtx.fillRect(backgroundX, backgroundY, boxWidth, finalBoxHeight);
 
             // 2. Draw Text
-            ctx.font = `bold ${fontSize}px ${fontFamily}`;
-            ctx.textBaseline = 'alphabetic';
-
-            ctx.save();
-            ctx.fillStyle = textColor;
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
-            ctx.shadowBlur = 5;
-            ctx.shadowOffsetX = 2;
-            ctx.shadowOffsetY = 2;
-
-            ctx.textAlign = position.includes('L') ? 'left' : 'right';
+            tCtx.font = `bold ${fontSize}px ${fontFamily}`;
+            tCtx.textBaseline = 'alphabetic';
+            tCtx.save();
+            const textRgb = hexToRgb(textColor);
+            tCtx.fillStyle = `rgba(${textRgb}, ${textOpacity})`;
+            tCtx.shadowColor = `rgba(0,0,0,${Math.min(textOpacity + 0.1, 0.7)})`;
+            tCtx.shadowBlur = 5;
+            tCtx.shadowOffsetX = 2;
+            tCtx.shadowOffsetY = 2;
+            tCtx.textAlign = position.includes('L') ? 'left' : 'right';
             const textX = position.includes('L') ? backgroundX + textPadding : backgroundX + boxWidth - textPadding;
 
-            // Calculate start Y for centered text, considering lineHeight to align to baseline
             let yStart = backgroundY + verticalPadding;
-            
-            // Adjust yStart if boxHeightPx is fixed and larger than content to center the text block vertically
             if (boxHeightPx > 0) {
                 const availableHeight = boxHeightPx - (verticalPadding * 2);
-                const contentBlockHeight = totalGeoContentHeight;
-                const offset = (availableHeight - contentBlockHeight) / 2;
+                const offset = (availableHeight - totalGeoContentHeight) / 2;
                 yStart += offset;
             }
-
-            // Correct for baseline difference (start Y should be where the first line's baseline is)
-            let y = yStart + (lineHeight * 0.75); // Rough baseline approximation
-
+            let y = yStart + (lineHeight * 0.75);
             geoLines.forEach(line => {
-                ctx.fillText(line, textX, y);
+                tCtx.fillText(line, textX, y);
                 y += lineHeight;
             });
+            tCtx.restore();
 
-            ctx.restore();
+            // 3. Draw Logo Overlay
+            if (logoImage) {
+                const logoSize = getStyleValue(logoSizeSlider, logoSizeInputBox, 20, 200);
+                const logoPad = 10;
+                const logoPos = logoPositionSelect.value;
+                const logoX = logoPos.includes('L') ? logoPad : tCanvas.width  - logoSize - logoPad;
+                const logoY = logoPos.includes('B') ? tCanvas.height - logoSize - logoPad : logoPad;
+                tCtx.save();
+                tCtx.globalAlpha = 0.9;
+                tCtx.drawImage(logoImage, logoX, logoY, logoSize, logoSize);
+                tCtx.restore();
+            }
+
+            // 4. Draw QR Code (geoTag mode only)
+            if (qrCodeToggleEl.checked && currentMode === 'geoTag') {
+                const latVal = latitudeInput.value.trim();
+                const lonVal = longitudeInput.value.trim();
+                if (latVal && lonVal) {
+                    const qrText = `geo:${latVal},${lonVal}`;
+                    const qrSize = Math.round(getStyleValue(qrSizeSlider, qrSizeInputBox, 60, 200));
+                    try {
+                        const qrEl = await getQRCanvas(qrText, qrSize);
+                        // Place QR in the corner opposite the watermark
+                        const qrX = position.includes('L') ? tCanvas.width  - qrEl.width  : 0;
+                        const qrY = position.includes('B') ? tCanvas.height - qrEl.height : 0;
+                        tCtx.drawImage(qrEl, qrX, qrY);
+                    } catch (e) {
+                        console.warn('QR generation skipped:', e.message);
+                    }
+                }
+            }
         }
         
         downloadBtn.addEventListener('click', () => {
@@ -1163,6 +1463,288 @@
             timeInput.value = timeStr;
             
             if (originalImage) drawCanvas();
+        });
+
+        // ─── New Feature Refs ─────────────────────────────────────────
+        const copyBtn            = document.getElementById('copyBtn');
+        const textOpacitySlider  = document.getElementById('textOpacity');
+        const textOpacityInputBox = document.getElementById('textOpacityInput');
+        const logoLoader         = document.getElementById('logoLoader');
+        const logoPreviewEl      = document.getElementById('logoPreview');
+        const clearLogoBtn       = document.getElementById('clearLogoBtn');
+        const logoSizeSlider     = document.getElementById('logoSize');
+        const logoSizeInputBox   = document.getElementById('logoSizeInput');
+        const logoPositionSelect = document.getElementById('logoPosition');
+        const qrCodeToggleEl     = document.getElementById('qrCodeToggle');
+        const qrSizeSlider       = document.getElementById('qrSize');
+        const qrSizeInputBox     = document.getElementById('qrSizeInput');
+        const qrOptions          = document.getElementById('qrOptions');
+        const batchLoader        = document.getElementById('batchLoader');
+        const batchDownloadBtn   = document.getElementById('batchDownloadBtn');
+        const batchFileCount     = document.getElementById('batchFileCount');
+        let logoImage = null;
+        let batchFiles = [];
+
+        // Sync new sliders
+        syncSliderInput(textOpacitySlider, textOpacityInputBox, 0.05, 1.0);
+        syncSliderInput(logoSizeSlider, logoSizeInputBox, 20, 200);
+        syncSliderInput(qrSizeSlider, qrSizeInputBox, 60, 200);
+
+        // ─── QR Code Cache + Generator ────────────────────────────────
+        let _qrCacheText = '', _qrCacheSize = 0, _qrCacheCanvas = null;
+        async function getQRCanvas(text, size) {
+            if (text === _qrCacheText && size === _qrCacheSize && _qrCacheCanvas) return _qrCacheCanvas;
+            if (typeof QRCode === 'undefined') throw new Error('QRCode library not loaded');
+            return new Promise((resolve, reject) => {
+                const tmp = document.createElement('canvas');
+                QRCode.toCanvas(tmp, text, { width: size, margin: 1, color: { dark: '#000000', light: '#ffffff' } }, err => {
+                    if (err) { reject(err); return; }
+                    _qrCacheText = text; _qrCacheSize = size; _qrCacheCanvas = tmp;
+                    resolve(tmp);
+                });
+            });
+        }
+
+        // Invalidate QR cache when coords change
+        [latitudeInput, longitudeInput].forEach(el =>
+            el.addEventListener('input', () => { _qrCacheText = ''; })
+        );
+
+        // ─── QR Toggle ───────────────────────────────────────────────
+        qrCodeToggleEl.addEventListener('change', () => {
+            qrOptions.classList.toggle('hidden', !qrCodeToggleEl.checked);
+            if (originalImage) drawCanvas();
+        });
+        qrSizeSlider.addEventListener('input', () => { _qrCacheText = ''; if (originalImage) drawCanvas(); });
+
+        // ─── Logo Loader ─────────────────────────────────────────────
+        logoLoader.addEventListener('change', e => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = ev => {
+                logoImage = new Image();
+                logoImage.onload = () => {
+                    logoPreviewEl.src = ev.target.result;
+                    logoPreviewEl.style.display = 'block';
+                    clearLogoBtn.style.display = 'inline-flex';
+                    if (originalImage) drawCanvas();
+                };
+                logoImage.src = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+        clearLogoBtn.addEventListener('click', () => {
+            logoImage = null;
+            logoPreviewEl.style.display = 'none';
+            clearLogoBtn.style.display = 'none';
+            logoLoader.value = '';
+            if (originalImage) drawCanvas();
+        });
+        logoPositionSelect.addEventListener('change', () => { if (originalImage) drawCanvas(); });
+        logoSizeSlider.addEventListener('input', () => { if (originalImage) drawCanvas(); });
+
+        // ─── Copy to Clipboard ───────────────────────────────────────
+        copyBtn.addEventListener('click', async () => {
+            if (!originalImage) return;
+            try {
+                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+                await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+                copyBtn.textContent = '✓ Copied!';
+                setTimeout(() => { copyBtn.innerHTML = '📋 Copy'; }, 2000);
+            } catch (e) {
+                alert('Could not copy to clipboard. Your browser may not support this feature or requires a secure (HTTPS) context.');
+            }
+        });
+
+        // ─── Presets (localStorage) ───────────────────────────────────
+        function getPresetData(name) {
+            return {
+                name,
+                fontSize:          fontSizeInputBox.value,
+                fontFamily:        fontFamilyInput.value,
+                textColor:         textColorInput.value,
+                textOpacity:       textOpacityInputBox.value,
+                backgroundOpacity: backgroundOpacityInputBox.value,
+                boxColor:          boxColorInput.value,
+                boxWidth:          boxWidthPxInput.value,
+                boxHeight:         boxHeightPxInput.value,
+                lineSpacing:       lineSpacingRatioInputBox.value,
+                verticalPadding:   verticalPaddingInputBox.value,
+                position:          document.querySelector('input[name="position"]:checked').value,
+            };
+        }
+        function applyPreset(p) {
+            fontSizeInput.value       = p.fontSize;        fontSizeInputBox.value        = p.fontSize;
+            fontFamilyInput.value     = p.fontFamily;
+            textColorInput.value      = p.textColor;
+            if (p.textOpacity != null) { textOpacitySlider.value = p.textOpacity; textOpacityInputBox.value = p.textOpacity; }
+            backgroundOpacityInput.value    = p.backgroundOpacity; backgroundOpacityInputBox.value = p.backgroundOpacity;
+            boxColorInput.value       = p.boxColor;
+            boxWidthRatioInput.value  = Math.min(300, p.boxWidth); boxWidthPxInput.value    = p.boxWidth;
+            boxHeightPxSlider.value   = Math.min(500, p.boxHeight); boxHeightPxInput.value  = p.boxHeight;
+            lineSpacingRatioInput.value = p.lineSpacing; lineSpacingRatioInputBox.value = p.lineSpacing;
+            verticalPaddingInput.value  = Math.min(50, p.verticalPadding); verticalPaddingInputBox.value = p.verticalPadding;
+            const r = document.querySelector(`input[name="position"][value="${p.position}"]`);
+            if (r) r.checked = true;
+            if (originalImage) drawCanvas();
+        }
+        function renderPresets() {
+            const stored = JSON.parse(localStorage.getItem('geoTaggerPresets') || '[]');
+            const container = document.getElementById('presetsList');
+            container.innerHTML = '';
+            if (!stored.length) {
+                container.innerHTML = '<span style="font-size:0.78rem;color:rgba(200,210,240,0.35);">No saved presets yet.</span>';
+                return;
+            }
+            stored.forEach(p => {
+                const chip = document.createElement('div');
+                chip.className = 'preset-chip';
+                chip.innerHTML = `<span title="${p.name}">${p.name}</span>`
+                    + `<button class="preset-load-btn" title="Load">↩</button>`
+                    + `<button class="preset-del-btn" title="Delete">×</button>`;
+                chip.querySelector('.preset-load-btn').addEventListener('click', () => applyPreset(p));
+                chip.querySelector('.preset-del-btn').addEventListener('click', () => {
+                    const updated = JSON.parse(localStorage.getItem('geoTaggerPresets') || '[]').filter(x => x.name !== p.name);
+                    localStorage.setItem('geoTaggerPresets', JSON.stringify(updated));
+                    renderPresets();
+                });
+                container.appendChild(chip);
+            });
+        }
+        document.getElementById('savePresetBtn').addEventListener('click', () => {
+            const name = document.getElementById('presetNameInput').value.trim();
+            if (!name) { document.getElementById('presetNameInput').focus(); return; }
+            const presets = JSON.parse(localStorage.getItem('geoTaggerPresets') || '[]');
+            const idx = presets.findIndex(p => p.name === name);
+            const preset = getPresetData(name);
+            if (idx >= 0) presets[idx] = preset; else presets.push(preset);
+            localStorage.setItem('geoTaggerPresets', JSON.stringify(presets));
+            renderPresets();
+            document.getElementById('presetNameInput').value = '';
+        });
+        renderPresets();
+
+        // ─── Dark / Light Theme Toggle ────────────────────────────────
+        const themeToggleBtn = document.getElementById('themeToggleBtn');
+        let isDark = true;
+        themeToggleBtn.addEventListener('click', () => {
+            isDark = !isDark;
+            document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+            themeToggleBtn.innerHTML = isDark ? '☀️ Light Mode' : '🌙 Dark Mode';
+        });
+
+        // ─── EXIF GPS Auto-populate ───────────────────────────────────
+        async function tryReadExif(file) {
+            if (typeof exifr === 'undefined') return;
+            try {
+                const gps = await exifr.gps(file);
+                if (gps && gps.latitude != null && gps.longitude != null) {
+                    latitudeInput.value  = gps.latitude.toFixed(6);
+                    longitudeInput.value = gps.longitude.toFixed(6);
+                    _qrCacheText = ''; // invalidate QR cache
+                    if (originalImage) drawCanvas();
+                }
+            } catch (_) { /* silently skip if no GPS EXIF data */ }
+        }
+
+        // ─── Drag-and-Drop (upload zone + preview panel) ──────────────
+        function handleFileDrop(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+            if (!files.length) return;
+            const file = files[0];
+            imageFileName = file.name.replace(/(\.[\w\d_-]+)$/i, '_watermarked$1');
+            if (currentMode === 'geoTag') tryReadExif(file);
+            const reader = new FileReader();
+            reader.onload = ev => {
+                originalImage = new Image();
+                originalImage.onload = () => {
+                    placeholderText.style.display = 'none';
+                    canvas.style.display = 'block';
+                    drawCanvas();
+                    downloadBtn.disabled = false;
+                    copyBtn.disabled = false;
+                };
+                originalImage.src = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+        // Upload zone drag-and-drop
+        const uploadZoneEl = document.getElementById('uploadZone');
+        uploadZoneEl.addEventListener('dragenter', e => { e.preventDefault(); uploadZoneEl.style.borderColor = 'rgba(99,102,241,0.7)'; uploadZoneEl.style.background = 'rgba(99,102,241,0.1)'; });
+        uploadZoneEl.addEventListener('dragover',  e => { e.preventDefault(); });
+        uploadZoneEl.addEventListener('dragleave', e => { uploadZoneEl.style.borderColor = ''; uploadZoneEl.style.background = ''; });
+        uploadZoneEl.addEventListener('drop',      e => { uploadZoneEl.style.borderColor = ''; uploadZoneEl.style.background = ''; handleFileDrop(e); });
+        // Preview panel drag-and-drop
+        const previewPanelEl = document.querySelector('.preview-panel');
+        previewPanelEl.addEventListener('dragenter', e => { e.preventDefault(); previewPanelEl.style.outline = '2px dashed rgba(99,102,241,0.6)'; previewPanelEl.style.outlineOffset = '-4px'; });
+        previewPanelEl.addEventListener('dragover',  e => { e.preventDefault(); });
+        previewPanelEl.addEventListener('dragleave', () => { previewPanelEl.style.outline = ''; previewPanelEl.style.outlineOffset = ''; });
+        previewPanelEl.addEventListener('drop',      e => { previewPanelEl.style.outline = ''; previewPanelEl.style.outlineOffset = ''; handleFileDrop(e); });
+
+        // ─── Batch Processing ─────────────────────────────────────────
+        batchLoader.addEventListener('change', e => {
+            batchFiles = Array.from(e.target.files);
+            batchFileCount.textContent = batchFiles.length
+                ? `${batchFiles.length} image(s) selected`
+                : 'No files selected';
+            batchDownloadBtn.disabled = batchFiles.length === 0;
+        });
+        batchDownloadBtn.addEventListener('click', async () => {
+            if (!batchFiles.length) return;
+            if (typeof JSZip === 'undefined') {
+                alert('JSZip library not loaded. Please check your internet connection and refresh.');
+                return;
+            }
+            batchDownloadBtn.disabled = true;
+            batchDownloadBtn.textContent = 'Processing…';
+            const zip = new JSZip();
+            const offCanvas = document.createElement('canvas');
+            const offCtx = offCanvas.getContext('2d');
+            for (const file of batchFiles) {
+                try {
+                    const blob = await new Promise(resolve => {
+                        const reader = new FileReader();
+                        reader.onload = ev => {
+                            const img = new Image();
+                            img.onload = async () => {
+                                offCanvas.width  = img.width;
+                                offCanvas.height = img.height;
+                                offCtx.drawImage(img, 0, 0);
+                                await drawWatermark(offCanvas, offCtx, img);
+                                offCanvas.toBlob(resolve, 'image/png');
+                            };
+                            img.src = ev.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                    zip.file(file.name.replace(/(\.[\w\d_-]+)$/i, '_watermarked$1'), blob);
+                } catch (err) {
+                    console.error(`Failed to process ${file.name}:`, err);
+                }
+            }
+            const zipBlob = await zip.generateAsync({ type: 'blob' });
+            const url = URL.createObjectURL(zipBlob);
+            const a = document.createElement('a');
+            a.href = url; a.download = 'geo_watermarked_images.zip'; a.click();
+            setTimeout(() => URL.revokeObjectURL(url), 5000);
+            batchDownloadBtn.disabled = false;
+            batchDownloadBtn.innerHTML = '⬇ Download All as ZIP';
+        });
+
+        // ─── Keyboard Shortcuts ───────────────────────────────────────
+        // Ctrl/Cmd+D → Download, Ctrl/Cmd+L → Pick Location
+        document.addEventListener('keydown', e => {
+            if (!(e.ctrlKey || e.metaKey) || e.shiftKey || e.altKey) return;
+            if (e.key === 'd' || e.key === 'D') {
+                e.preventDefault();
+                if (!downloadBtn.disabled) downloadBtn.click();
+            } else if (e.key === 'l' || e.key === 'L') {
+                e.preventDefault();
+                if (currentMode === 'geoTag') pickGeoBtn.click();
+            }
         });
         
     </script>
