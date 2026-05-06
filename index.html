@@ -3,260 +3,793 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hybrid Watermark Generator</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>GEO-TAGGER — Watermark Generator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Roboto+Mono:wght@400;700&family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Roboto+Mono:wght@400;700&family=Merriweather:wght@400;700&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        .control-panel { background-color: #f8fafc; }
-        .preview-panel { background-color: #e2e8f0; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        /* ── Aurora Background ─────────────────────────────────────── */
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background: #060612;
+            color: #e2e8f0;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .aurora {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(90px);
+            opacity: 0.22;
+            animation: floatOrb linear infinite;
+        }
+        .orb-1 { width: 600px; height: 600px; background: radial-gradient(circle, #6366f1, #312e81); top: -10%; left: -10%; animation-duration: 22s; }
+        .orb-2 { width: 500px; height: 500px; background: radial-gradient(circle, #0ea5e9, #0c4a6e); top: 20%; right: -8%; animation-duration: 18s; animation-delay: -6s; }
+        .orb-3 { width: 450px; height: 450px; background: radial-gradient(circle, #8b5cf6, #4c1d95); bottom: -5%; left: 30%; animation-duration: 26s; animation-delay: -11s; }
+        .orb-4 { width: 300px; height: 300px; background: radial-gradient(circle, #06b6d4, #164e63); bottom: 10%; right: 20%; animation-duration: 20s; animation-delay: -3s; }
+        .orb-5 { width: 250px; height: 250px; background: radial-gradient(circle, #a78bfa, #7c3aed); top: 55%; left: 10%; animation-duration: 16s; animation-delay: -8s; }
+
+        @keyframes floatOrb {
+            0%   { transform: translate(0, 0) scale(1); }
+            33%  { transform: translate(40px, -30px) scale(1.05); }
+            66%  { transform: translate(-25px, 50px) scale(0.95); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+
+        /* ── Layout ────────────────────────────────────────────────── */
+        .page-wrapper {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem 4rem;
+        }
+
+        /* ── Glass Utility ──────────────────────────────────────────── */
+        .glass {
+            background: linear-gradient(135deg,
+                rgba(255,255,255,0.07) 0%,
+                rgba(255,255,255,0.03) 100%);
+            backdrop-filter: blur(28px) saturate(180%) brightness(108%);
+            -webkit-backdrop-filter: blur(28px) saturate(180%) brightness(108%);
+            border: 1px solid rgba(255,255,255,0.13);
+            border-top-color: rgba(255,255,255,0.22);
+            border-left-color: rgba(255,255,255,0.16);
+            box-shadow:
+                0 32px 64px rgba(0,0,0,0.55),
+                0 0 0 1px rgba(255,255,255,0.04),
+                inset 0 1px 0 rgba(255,255,255,0.14),
+                inset 0 -1px 0 rgba(0,0,0,0.12);
+            border-radius: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+        /* iridescent sheen */
+        .glass::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: linear-gradient(135deg,
+                rgba(99,102,241,0.07) 0%,
+                rgba(139,92,246,0.05) 30%,
+                rgba(6,182,212,0.04) 65%,
+                rgba(16,185,129,0.03) 100%);
+            pointer-events: none;
+        }
+        .glass-inner {
+            position: relative;
+            z-index: 1;
+            padding: 1.75rem;
+        }
+
+        /* ── Header ──────────────────────────────────────────────── */
+        header {
+            text-align: center;
+            padding: 3rem 0 2.5rem;
+        }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: rgba(99,102,241,0.18);
+            border: 1px solid rgba(99,102,241,0.35);
+            color: #a5b4fc;
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 0.3rem 0.85rem;
+            border-radius: 999px;
+            margin-bottom: 1.2rem;
+        }
+        .badge-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: #818cf8;
+            box-shadow: 0 0 6px #818cf8;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+
+        h1.main-title {
+            font-size: clamp(2.2rem, 5vw, 3.8rem);
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -0.03em;
+            background: linear-gradient(135deg, #e0e7ff 0%, #a5b4fc 35%, #67e8f9 70%, #34d399 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: shimmer 6s linear infinite;
+            background-size: 200% auto;
+        }
+        @keyframes shimmer {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+        .subtitle {
+            max-width: 600px;
+            margin: 1rem auto 0;
+            font-size: 0.95rem;
+            color: rgba(200,210,240,0.65);
+            line-height: 1.7;
+        }
+
+        /* ── Main Grid ───────────────────────────────────────────── */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        @media (min-width: 900px) {
+            .main-grid { grid-template-columns: 380px 1fr; align-items: start; }
+        }
+
+        /* ── Section Labels ──────────────────────────────────────── */
+        .section-title {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: rgba(165,180,252,0.75);
+            margin-bottom: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .section-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(165,180,252,0.25), transparent);
+        }
+
+        .panel-heading {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #e2e8f0;
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+        .panel-heading .step-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 26px; height: 26px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: #fff;
+            flex-shrink: 0;
+            box-shadow: 0 0 12px rgba(99,102,241,0.5);
+        }
+
+        /* ── Form Controls ───────────────────────────────────────── */
+        .form-group { margin-bottom: 1rem; }
+        .form-group label {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: rgba(200,210,240,0.7);
+            margin-bottom: 0.4rem;
+            letter-spacing: 0.02em;
+        }
+        .glass-input {
+            width: 100%;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 0.55rem 0.85rem;
+            color: #e2e8f0;
+            font-size: 0.875rem;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+        }
+        .glass-input::placeholder { color: rgba(200,210,240,0.3); }
+        .glass-input:focus {
+            background: rgba(99,102,241,0.08);
+            border-color: rgba(99,102,241,0.55);
+            box-shadow: 0 0 0 3px rgba(99,102,241,0.18), 0 0 12px rgba(99,102,241,0.12);
+        }
+        .glass-input option { background: #1e1e3a; color: #e2e8f0; }
+
+        textarea.glass-input { resize: vertical; min-height: 64px; }
+
+        /* ── Mode Toggle ─────────────────────────────────────────── */
+        .mode-toggle {
+            display: flex;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.09);
+            border-radius: 12px;
+            padding: 4px;
+            gap: 4px;
+        }
+        .mode-toggle label {
+            flex: 1;
+            position: relative;
+            cursor: pointer;
+        }
+        .mode-toggle input[type="radio"] { position: absolute; opacity: 0; width: 0; height: 0; }
+        .mode-toggle .mode-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            padding: 0.55rem 0.5rem;
+            border-radius: 9px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: rgba(200,210,240,0.55);
+            transition: all 0.25s;
+        }
+        .mode-toggle input[type="radio"]:checked + .mode-label {
+            background: linear-gradient(135deg, rgba(99,102,241,0.45), rgba(139,92,246,0.35));
+            color: #e0e7ff;
+            box-shadow: 0 0 0 1px rgba(99,102,241,0.4), 0 4px 12px rgba(99,102,241,0.25);
+        }
+
+        /* ── Buttons ─────────────────────────────────────────────── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.45rem;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 0.83rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.22s;
+            padding: 0.6rem 1.1rem;
+            letter-spacing: 0.01em;
+        }
+        .btn-ghost {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: rgba(200,210,240,0.8);
+        }
+        .btn-ghost:hover {
+            background: rgba(99,102,241,0.12);
+            border-color: rgba(99,102,241,0.35);
+            color: #c7d2fe;
+            box-shadow: 0 0 12px rgba(99,102,241,0.2);
+            transform: translateY(-1px);
+        }
+        .btn-primary {
+            width: 100%;
+            padding: 0.9rem 1.5rem;
+            font-size: 0.95rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #06b6d4 100%);
+            background-size: 200% auto;
+            color: #fff;
+            border-radius: 14px;
+            box-shadow: 0 4px 24px rgba(99,102,241,0.45), 0 0 0 1px rgba(255,255,255,0.1) inset;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%);
+            transform: translateX(-100%);
+            transition: transform 0.5s;
+        }
+        .btn-primary:hover:not(:disabled)::before { transform: translateX(100%); }
+        .btn-primary:hover:not(:disabled) {
+            background-position: right center;
+            box-shadow: 0 8px 32px rgba(99,102,241,0.6), 0 0 0 1px rgba(255,255,255,0.15) inset;
+            transform: translateY(-2px);
+        }
+        .btn-primary:active:not(:disabled) { transform: translateY(0); }
+        .btn-primary:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+            background: rgba(255,255,255,0.08);
+            box-shadow: none;
+        }
+        .btn-sm {
+            width: 100%;
+            padding: 0.55rem 1rem;
+            font-size: 0.8rem;
+        }
+
+        /* ── Range Slider ────────────────────────────────────────── */
+        .slider-row { display: flex; align-items: center; gap: 0.7rem; }
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            flex: 1;
+            height: 5px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.1);
+            outline: none;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px; height: 18px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #818cf8, #6366f1);
+            border: 2px solid rgba(255,255,255,0.3);
+            box-shadow: 0 0 8px rgba(99,102,241,0.6);
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 14px rgba(99,102,241,0.9);
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 18px; height: 18px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #818cf8, #6366f1);
+            border: 2px solid rgba(255,255,255,0.3);
+            box-shadow: 0 0 8px rgba(99,102,241,0.6);
+            cursor: pointer;
+        }
+        .num-input {
+            width: 68px;
+            flex-shrink: 0;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 0.35rem 0.55rem;
+            color: #e2e8f0;
+            font-size: 0.8rem;
+            font-family: 'Roboto Mono', monospace;
+            text-align: center;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .num-input:focus {
+            border-color: rgba(99,102,241,0.5);
+            box-shadow: 0 0 0 2px rgba(99,102,241,0.18);
+        }
+
+        /* ── Color Swatch ────────────────────────────────────────── */
+        input[type="color"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 42px;
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 10px;
+            background: none;
+            cursor: pointer;
+            padding: 3px;
+            transition: box-shadow 0.2s;
+        }
+        input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; border-radius: 8px; }
+        input[type="color"]::-webkit-color-swatch { border: none; border-radius: 8px; }
+        input[type="color"]:hover { box-shadow: 0 0 0 3px rgba(99,102,241,0.3); }
+
+        /* ── Radio Position Grid ─────────────────────────────────── */
+        #positionControls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+        #positionControls label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            font-size: 0.82rem;
+            color: rgba(200,210,240,0.75);
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 9px;
+            padding: 0.5rem 0.75rem;
+            transition: all 0.2s;
+        }
+        #positionControls label:has(input:checked) {
+            background: rgba(99,102,241,0.15);
+            border-color: rgba(99,102,241,0.4);
+            color: #c7d2fe;
+        }
+        #positionControls input[type="radio"] {
+            accent-color: #6366f1;
+            width: 14px; height: 14px;
+        }
+
+        /* ── File Upload ─────────────────────────────────────────── */
+        .upload-zone {
+            width: 100%;
+            border: 2px dashed rgba(255,255,255,0.12);
+            border-radius: 14px;
+            padding: 1.2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s;
+            background: rgba(255,255,255,0.03);
+            position: relative;
+        }
+        .upload-zone:hover {
+            border-color: rgba(99,102,241,0.5);
+            background: rgba(99,102,241,0.06);
+        }
+        .upload-zone input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+        }
+        .upload-icon {
+            font-size: 2rem;
+            margin-bottom: 0.4rem;
+            display: block;
+        }
+        .upload-text { font-size: 0.82rem; color: rgba(200,210,240,0.55); }
+        .upload-text strong { color: #a5b4fc; }
+
+        /* ── Preview Panel ───────────────────────────────────────── */
+        .preview-panel {
+            min-height: 420px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
         #imageCanvas {
             max-width: 100%;
             height: auto;
-            border-radius: 0.5rem;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            border-radius: 14px;
+            box-shadow: 0 16px 48px rgba(0,0,0,0.6);
+            display: none;
         }
-        /* File input styling remains the same */
-        input[type="file"]::file-selector-button {
-            background-color: #1e293b;
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 0.375rem;
-            cursor: pointer;
-            transition: background-color 0.2s;
+        #placeholder-text {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            color: rgba(200,210,240,0.3);
+            font-size: 0.95rem;
         }
-        input[type="file"]::file-selector-button:hover {
-            background-color: #334155;
+        #placeholder-text .ph-icon {
+            font-size: 4rem;
+            filter: drop-shadow(0 0 16px rgba(99,102,241,0.3));
+            opacity: 0.5;
         }
-    </style>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-</head>
-<body class="bg-slate-100 text-slate-800">
 
-    <div class="container mx-auto p-4 md:p-8">
-        <header class="text-center mb-8">
-            <!-- Dynamic header updated by JavaScript based on mode -->
-            <h1 id="mainTitle" class="text-4xl font-bold text-slate-900">Geo-Tag Watermark Generator</h1>
-            <div class="max-w-2xl mx-auto mt-4 mb-2 text-base text-slate-700 bg-slate-100 rounded-lg p-4 shadow">
-                <strong>About:</strong> This tool allows you to add geo-tagged or chainage-based watermark information to your images. You can customize the watermark style, position, and automatically fetch location and time data for convenience.
-            </div>
+        /* ── Divider ─────────────────────────────────────────────── */
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+            margin: 1.25rem 0;
+        }
+
+        /* ── Error Message ────────────────────────────────────────── */
+        .error-msg {
+            font-size: 0.75rem;
+            color: #f87171;
+            margin-top: 0.4rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        /* ── Sub section header ───────────────────────────────────── */
+        .sub-heading {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: rgba(165,180,252,0.7);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin: 1.2rem 0 0.7rem;
+        }
+
+        /* ── Grid helpers ──────────────────────────────────────────── */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; }
+        .col-span-2 { grid-column: span 2; }
+
+        /* ── Footer ──────────────────────────────────────────────── */
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            font-size: 0.78rem;
+            color: rgba(200,210,240,0.3);
+            letter-spacing: 0.04em;
+        }
+        footer a { color: rgba(165,180,252,0.6); text-decoration: none; }
+        footer a:hover { color: #a5b4fc; }
+
+        /* ── Scrollbar ───────────────────────────────────────────── */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.3); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(99,102,241,0.5); }
+
+        /* ── Transitions for mode switch ─────────────────────────── */
+        #geoTagModeFields, #chainageModeFields {
+            transition: opacity 0.25s;
+        }
+        #chainageModeFields.hidden, #geoTagModeFields.hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <!-- Animated aurora background -->
+    <div class="aurora" aria-hidden="true">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+        <div class="orb orb-4"></div>
+        <div class="orb orb-5"></div>
+    </div>
+
+    <div class="page-wrapper">
+
+        <!-- ── Header ─────────────────────────────────────────────── -->
+        <header>
+            <div class="badge"><span class="badge-dot"></span>Professional Watermark Tool</div>
+            <h1 id="mainTitle" class="main-title">Geo-Tag Watermark Generator</h1>
+            <p class="subtitle">
+                Stamp precise geo-location or chainage data directly onto your images — fully customisable, entirely in-browser.
+            </p>
         </header>
 
-        <main class="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-8">
-            
-            <div class="md:col-span-4 control-panel p-2 md:p-6 rounded-lg shadow-lg overflow-auto">
-                <h2 class="text-2xl font-bold mb-4 border-b pb-2">Controls</h2>
-                
-                <div class="space-y-4">
+        <!-- ── Main Grid ──────────────────────────────────────────── -->
+        <main class="main-grid">
 
-                    <!-- 1. Upload Image -->
-                    <div>
-                        <label for="imageLoader" class="block text-sm font-medium text-slate-700 mb-1">1. Upload Image</label>
-                        <input type="file" id="imageLoader" name="imageLoader" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-slate-50 file:text-slate-700 hover:file:bg-slate-100"/>
+            <!-- ── Control Panel ──────────────────────────────────── -->
+            <div class="glass" style="align-self: start;">
+                <div class="glass-inner" style="padding:1.5rem 1.5rem 1.75rem;">
+
+                    <!-- 1. Upload -->
+                    <div class="section-title">Step 1</div>
+                    <div class="form-group">
+                        <div class="upload-zone" id="uploadZone">
+                            <input type="file" id="imageLoader" name="imageLoader" accept="image/*">
+                            <span class="upload-icon">🖼️</span>
+                            <div class="upload-text"><strong>Click to upload</strong> or drag & drop</div>
+                            <div class="upload-text" style="margin-top:0.2rem;">PNG, JPG, WEBP supported</div>
+                        </div>
                     </div>
-                    
-                    <!-- 1b. Mode Selector -->
-                    <div class="pt-4 border-t">
-                        <h3 class="text-lg font-semibold text-slate-800 mb-2">2. Select Watermark Mode</h3>
-                        <div class="flex gap-4 p-3 bg-white rounded-lg shadow">
-                            <label class="flex items-center">
-                                <input type="radio" name="watermarkMode" value="geoTag" id="modeGeoTag" checked class="mr-2 h-4 w-4 text-slate-600 focus:ring-slate-500">
-                                <span class="text-sm font-medium text-slate-700">Geo-Tag Mode</span>
+
+                    <div class="divider"></div>
+
+                    <!-- 2. Mode -->
+                    <div class="section-title">Step 2 — Mode</div>
+                    <div class="form-group">
+                        <div class="mode-toggle">
+                            <label>
+                                <input type="radio" name="watermarkMode" value="geoTag" id="modeGeoTag" checked>
+                                <div class="mode-label">📍 Geo-Tag</div>
                             </label>
-                            <label class="flex items-center">
-                                <input type="radio" name="watermarkMode" value="chainage" id="modeChainage" class="mr-2 h-4 w-4 text-slate-600 focus:ring-slate-500">
-                                <span class="text-sm font-medium text-slate-700">Chainage Mode</span>
+                            <label>
+                                <input type="radio" name="watermarkMode" value="chainage" id="modeChainage">
+                                <div class="mode-label">📏 Chainage</div>
                             </label>
                         </div>
                     </div>
+
+                    <div class="divider"></div>
 
                     <!-- 3. Watermark Details -->
-                    <div class="pt-4">
-                        <h3 class="text-lg font-semibold text-slate-800 mb-2">3. Watermark Details</h3>
-                        <div class="bg-white rounded-lg shadow p-4 space-y-4">
-                            
-                            <!-- GEO-TAG FIELDS: Visible in Geo-Tag Mode -->
-                            <div id="geoTagModeFields">
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <div>
-                                        <label for="latitude" class="block text-sm font-medium text-slate-700">Latitude</label>
-                                        <input type="text" id="latitude" class="mt-1 block w-full rounded-md border border-slate-300 shadow-sm focus:border-slate-500 focus:ring-2 focus:ring-slate-500 transition" value="" placeholder="33.436187">
-                                    </div>
-                                    <div>
-                                        <label for="longitude" class="block text-sm font-medium text-slate-700">Longitude</label>
-                                        <input type="text" id="longitude" class="mt-1 block w-full rounded-md border border-slate-300 shadow-sm focus:border-slate-500 focus:ring-2 focus:ring-slate-500 transition" value="" placeholder="75.605647">
-                                    </div>
-                                    <div class="sm:col-span-2">
-                                        <button id="pickGeoBtn" type="button" class="w-full px-3 py-2 mt-2 rounded bg-slate-700 text-white text-xs font-semibold hover:bg-slate-800 focus:ring-2 focus:ring-slate-500 transition">Pick Automatically</button>
-                                        <p id="geoErrorMsg" class="text-xs text-red-500 mt-1 hidden">Geolocation error.</p>
-                                    </div>
-                                    <div>
-                                        <label for="elevation" class="block text-sm font-medium text-slate-700">Elevation</label>
-                                        <input type="text" id="elevation" class="mt-1 block w-full rounded-md border border-slate-300 shadow-sm focus:border-slate-500 focus:ring-2 focus:ring-slate-500 transition" value="" placeholder="1452.0±199 m">
-                                    </div>
-                                    <div>
-                                        <label for="accuracy" class="block text-sm font-medium text-slate-700">Accuracy</label>
-                                        <input type="text" id="accuracy" class="mt-1 block w-full rounded-md border border-slate-300 shadow-sm focus:border-slate-500 focus:ring-2 focus:ring-slate-500 transition" value="" placeholder="13.7 m">
-                                    </div>
-                                </div>
-                                <div>
-                                    <label for="note" class="block text-sm font-medium text-slate-700">Note (Single Line)</label>
-                                    <textarea id="note" rows="2" class="mt-1 block w-full rounded-md border border-slate-300 shadow-sm focus:border-slate-500 focus:ring-2 focus:ring-slate-500 transition" placeholder="Add a note or any other Details"></textarea>
-                                </div>
-                            </div>
+                    <div class="section-title">Step 3 — Details</div>
 
-                            <!-- CHAINAGE FIELD: Visible in Chainage Mode -->
-                            <div id="chainageModeFields" class="hidden">
-                                <div>
-                                    <label for="chainageNumber" class="block text-sm font-medium text-slate-700">Chainage Number</label>
-                                    <input type="text" id="chainageNumber" class="mt-1 block w-full rounded-md border border-slate-300 shadow-sm focus:border-slate-500 focus:ring-2 focus:ring-slate-500 transition" value="" placeholder="C123+45.67">
-                                </div>
+                    <!-- GEO-TAG FIELDS -->
+                    <div id="geoTagModeFields">
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label for="latitude">Latitude</label>
+                                <input type="text" id="latitude" class="glass-input" placeholder="33.436187">
                             </div>
-                            
-                            <!-- SHARED FIELDS: Date and Time -->
-                            <div class="sm:col-span-2 pt-2 border-t border-slate-200">
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <div>
-                                        <label for="dateInput" class="block text-sm font-medium text-slate-700">Date</label>
-                                        <input type="text" id="dateInput" class="mt-1 block w-full rounded-md border border-slate-300 shadow-sm focus:border-slate-500 focus:ring-2 focus:ring-slate-500 transition" value="" placeholder="01-05-2024">
-                                    </div>
-                                    <div>
-                                        <label for="timeInput" class="block text-sm font-medium text-slate-700">Time</label>
-                                        <input type="text" id="timeInput" class="mt-1 block w-full rounded-md border border-slate-300 shadow-sm focus:border-slate-500 focus:ring-2 focus:ring-slate-500 transition" value="" placeholder="12:26">
-                                    </div>
-                                    <div class="sm:col-span-2">
-                                        <button id="pickDateTimeBtn" type="button" class="w-full px-3 py-2 mt-2 rounded bg-slate-700 text-white text-xs font-semibold hover:bg-slate-800 focus:ring-2 focus:ring-slate-500 transition">Pick Current Date & Time</button>
-                                    </div>
-                                </div>
+                            <div class="form-group">
+                                <label for="longitude">Longitude</label>
+                                <input type="text" id="longitude" class="glass-input" placeholder="75.605647">
                             </div>
-
+                            <div class="form-group col-span-2">
+                                <button id="pickGeoBtn" type="button" class="btn btn-ghost btn-sm">
+                                    📡 Pick Location Automatically
+                                </button>
+                                <p id="geoErrorMsg" class="error-msg hidden">⚠ Geolocation error.</p>
+                            </div>
+                            <div class="form-group">
+                                <label for="elevation">Elevation</label>
+                                <input type="text" id="elevation" class="glass-input" placeholder="1452.0 m">
+                            </div>
+                            <div class="form-group">
+                                <label for="accuracy">Accuracy</label>
+                                <input type="text" id="accuracy" class="glass-input" placeholder="13.7 m">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="note">Note</label>
+                            <textarea id="note" class="glass-input" rows="2" placeholder="Add a note or any other details"></textarea>
                         </div>
                     </div>
 
-                    <!-- 4. Style Options (Remains the same and applies to both modes) -->
-                    <div class="pt-4">
-                        <h3 class="text-lg font-semibold text-slate-800 mb-2 border-b pb-2">4. Style Options</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-4 items-center">
-                            <div>
-                                <label for="fontSize" class="block text-sm font-medium text-slate-700 mb-1">Font Size (px)</label>
-                                <div class="flex flex-col md:flex-row items-center gap-2">
-                                    <!-- Initial value set to 24px -->
-                                    <input type="range" id="fontSize" min="10" max="60" value="24" step="2" class="w-full md:w-2/3 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
-                                    <input type="number" id="fontSizeInput" min="10" max="60" value="24" step="2" class="w-full md:w-16 px-2 py-1 rounded border border-slate-300 text-sm">
-                                </div>
-                            </div>
-                            <div>
-                                <label for="fontFamily" class="block text-sm font-medium text-slate-700 mb-1">Font Family</label>
-                                <select id="fontFamily" class="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-slate-500 focus:ring-slate-500 sm:text-sm">
-                                    <option value="sans-serif">Inter (Sans-serif)</option>
-                                    <option value="monospace">Roboto Mono (Monospace)</option>
-                                    <option value="serif">Merriweather (Serif)</option>
-                                    <option value="Arial, sans-serif">Arial</option>
-                                    <option value="Verdana, sans-serif">Verdana</option>
-                                    <option value="Tahoma, sans-serif">Tahoma</option>
-                                    <option value="Trebuchet MS, sans-serif">Trebuchet MS</option>
-                                    <option value="Georgia, serif">Georgia</option>
-                                    <option value="Times New Roman, serif">Times New Roman</option>
-                                    <option value="Courier New, monospace">Courier New</option>
-                                    <option value="Lucida Console, monospace">Lucida Console</option>
-                                    <option value="Fira Mono, monospace">Fira Mono</option>
-                                    <option value="Montserrat, sans-serif">Montserrat</option>
-                                    <option value="Lato, sans-serif">Lato</option>
-                                    <option value="Oswald, sans-serif">Oswald</option>
-                                </select>
-                            </div>
+                    <!-- CHAINAGE FIELD -->
+                    <div id="chainageModeFields" class="hidden">
+                        <div class="form-group">
+                            <label for="chainageNumber">Chainage Number</label>
+                            <input type="text" id="chainageNumber" class="glass-input" placeholder="C123+45.67">
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-4 items-center mt-4">
-                            <div>
-                                <label for="textColor" class="block text-sm font-medium text-slate-700 mb-1">Text Color</label>
-                                <input type="color" id="textColor" value="#FFFFFF" class="mt-1 block w-full h-10 rounded-md border-slate-300 shadow-sm">
-                            </div>
-                            <div>
-                                <label for="lineSpacingRatio" class="block text-sm font-medium text-slate-700 mb-1">Line Spacing Ratio</label>
-                                <div class="flex flex-col md:flex-row items-center gap-2">
-                                    <input type="range" id="lineSpacingRatio" min="1.0" max="2.0" value="1.2" step="0.1" class="w-full md:w-2/3 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
-                                    <input type="number" id="lineSpacingRatioInput" min="1.0" max="2.0" value="1.2" step="0.1" class="w-full md:w-16 px-2 py-1 rounded border border-slate-300 text-sm">
-                                </div>
-                            </div>
-                        </div>
-
-                        <h4 class="text-md font-semibold text-slate-700 mt-4 mb-2">Background Box Settings</h4>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-4 items-center">
-                            <div>
-                                <label for="boxColor" class="block text-sm font-medium text-slate-700 mb-1">Box Color</label>
-                                <input type="color" id="boxColor" value="#000000" class="mt-1 block w-full h-10 rounded-md border-slate-300 shadow-sm">
-                            </div>
-                            <div>
-                                <label for="backgroundOpacity" class="block text-sm font-medium text-slate-700 mb-1">Opacity</label>
-                                <div class="flex flex-col md:flex-row items-center gap-2">
-                                    <input type="range" id="backgroundOpacity" min="0.1" max="1.0" step="0.1" value="0.5" class="w-full md:w-2/3 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
-                                    <input type="number" id="backgroundOpacityInput" min="0.1" max="1.0" step="0.1" value="0.5" class="w-full md:w-16 px-2 py-1 rounded border border-slate-300 text-sm">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-4 items-center mt-4">
-                            <div>
-                                <label for="boxWidthPxInput" class="block text-sm font-medium text-slate-700 mb-1">Box Width (px)</label>
-                                <div class="flex flex-col md:flex-row items-center gap-2">
-                                    <input type="range" id="boxWidthRatio" min="10" max="300" value="200" step="10" class="w-full md:w-2/3 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
-                                    <input type="number" id="boxWidthPxInput" min="10" max="10000" value="200" step="1" class="w-full md:w-20 px-2 py-1 rounded border border-slate-300 text-sm">
-                                </div>
-                            </div>
-                            <div>
-                                <label for="verticalPadding" class="block text-sm font-medium text-slate-700 mb-1">Vertical Padding (px)</label>
-                                <div class="flex flex-col md:flex-row items-center gap-2">
-                                    <input type="range" id="verticalPadding" min="0" max="50" value="10" step="2" class="w-full md:w-2/3 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
-                                    <input type="number" id="verticalPaddingInput" min="0" max="50" value="10" step="2" class="w-full md:w-16 px-2 py-1 rounded border border-slate-300 text-sm">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-4 items-center mt-4">
-                            <div>
-                                <label for="boxHeightPxInput" class="block text-sm font-medium text-slate-700 mb-1">Box Height (px) (0 for Auto)</label>
-                                <div class="flex flex-col md:flex-row items-center gap-2">
-                                    <input type="range" id="boxHeightPx" min="0" max="500" value="0" step="10" class="w-full md:w-2/3 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
-                                    <input type="number" id="boxHeightPxInput" min="0" max="1000" value="0" step="10" class="w-full md:w-20 px-2 py-1 rounded border border-slate-300 text-sm">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mt-4">
-                            <label class="block text-sm font-medium text-slate-700 mb-1">Watermark Position</label>
-                            <div id="positionControls" class="flex flex-wrap gap-4 text-sm">
-                                <label><input type="radio" name="position" value="BL" checked class="mr-1"> Bottom-Left</label>
-                                <label><input type="radio" name="position" value="BR" class="mr-1"> Bottom-Right</label>
-                                <label><input type="radio" name="position" value="TL" class="mr-1"> Top-Left</label>
-                                <label><input type="radio" name="position" value="TR" class="mr-1"> Top-Right</label>
-                            </div>
-                        </div>
-                        
                     </div>
 
-                    <div class="pt-6 text-center">
-                        <button id="downloadBtn" class="w-full bg-slate-800 text-white font-bold py-3 px-4 rounded-lg hover:bg-slate-700 transition-colors disabled:bg-slate-400 disabled:cursor-not-allowed">
-                            Download Image
-                        </button>
+                    <!-- Date & Time (shared) -->
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label for="dateInput">Date</label>
+                            <input type="text" id="dateInput" class="glass-input" placeholder="01-05-2024">
+                        </div>
+                        <div class="form-group">
+                            <label for="timeInput">Time</label>
+                            <input type="text" id="timeInput" class="glass-input" placeholder="12:26">
+                        </div>
+                        <div class="form-group col-span-2">
+                            <button id="pickDateTimeBtn" type="button" class="btn btn-ghost btn-sm">
+                                🕐 Set Current Date &amp; Time
+                            </button>
+                        </div>
                     </div>
+
+                    <div class="divider"></div>
+
+                    <!-- 4. Style Options -->
+                    <div class="section-title">Step 4 — Style</div>
+
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label for="fontSize">Font Size (px)</label>
+                            <div class="slider-row">
+                                <input type="range" id="fontSize" min="10" max="60" value="24" step="2">
+                                <input type="number" id="fontSizeInput" min="10" max="60" value="24" step="2" class="num-input">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="fontFamily">Font</label>
+                            <select id="fontFamily" class="glass-input">
+                                <option value="sans-serif">Inter</option>
+                                <option value="monospace">Roboto Mono</option>
+                                <option value="serif">Merriweather</option>
+                                <option value="Arial, sans-serif">Arial</option>
+                                <option value="Verdana, sans-serif">Verdana</option>
+                                <option value="Tahoma, sans-serif">Tahoma</option>
+                                <option value="Trebuchet MS, sans-serif">Trebuchet MS</option>
+                                <option value="Georgia, serif">Georgia</option>
+                                <option value="Times New Roman, serif">Times New Roman</option>
+                                <option value="Courier New, monospace">Courier New</option>
+                                <option value="Lucida Console, monospace">Lucida Console</option>
+                                <option value="Fira Mono, monospace">Fira Mono</option>
+                                <option value="Montserrat, sans-serif">Montserrat</option>
+                                <option value="Lato, sans-serif">Lato</option>
+                                <option value="Oswald, sans-serif">Oswald</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label for="textColor">Text Color</label>
+                            <input type="color" id="textColor" value="#FFFFFF">
+                        </div>
+                        <div class="form-group">
+                            <label for="lineSpacingRatio">Line Spacing</label>
+                            <div class="slider-row">
+                                <input type="range" id="lineSpacingRatio" min="1.0" max="2.0" value="1.2" step="0.1">
+                                <input type="number" id="lineSpacingRatioInput" min="1.0" max="2.0" value="1.2" step="0.1" class="num-input">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sub-heading">Box Settings</div>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label for="boxColor">Box Color</label>
+                            <input type="color" id="boxColor" value="#000000">
+                        </div>
+                        <div class="form-group">
+                            <label for="backgroundOpacity">Opacity</label>
+                            <div class="slider-row">
+                                <input type="range" id="backgroundOpacity" min="0.1" max="1.0" step="0.1" value="0.5">
+                                <input type="number" id="backgroundOpacityInput" min="0.1" max="1.0" step="0.1" value="0.5" class="num-input">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="boxWidthPxInput">Box Width (px)</label>
+                            <div class="slider-row">
+                                <input type="range" id="boxWidthRatio" min="10" max="300" value="200" step="10">
+                                <input type="number" id="boxWidthPxInput" min="10" max="10000" value="200" step="1" class="num-input">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="verticalPadding">Vertical Pad (px)</label>
+                            <div class="slider-row">
+                                <input type="range" id="verticalPadding" min="0" max="50" value="10" step="2">
+                                <input type="number" id="verticalPaddingInput" min="0" max="50" value="10" step="2" class="num-input">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="boxHeightPxInput">Box Height (0=Auto)</label>
+                            <div class="slider-row">
+                                <input type="range" id="boxHeightPx" min="0" max="500" value="0" step="10">
+                                <input type="number" id="boxHeightPxInput" min="0" max="1000" value="0" step="10" class="num-input">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-top:0.25rem;">
+                        <label style="margin-bottom:0.6rem;">Watermark Position</label>
+                        <div id="positionControls">
+                            <label><input type="radio" name="position" value="TL"> Top-Left</label>
+                            <label><input type="radio" name="position" value="TR"> Top-Right</label>
+                            <label><input type="radio" name="position" value="BL" checked> Bottom-Left</label>
+                            <label><input type="radio" name="position" value="BR"> Bottom-Right</label>
+                        </div>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <!-- Download -->
+                    <button id="downloadBtn" class="btn btn-primary" disabled>
+                        ⬇ Download Watermarked Image
+                    </button>
 
                 </div>
             </div>
 
-            <div class="md:col-span-8 preview-panel p-2 md:p-6 rounded-lg shadow-lg flex items-center justify-center overflow-auto">
-                <div id="canvas-container" class="w-full h-full flex items-center justify-center">
-                    <canvas id="imageCanvas" style="display:none;"></canvas>
-                    <p id="placeholder-text" class="text-slate-500">Upload an image to see the preview here</p>
+            <!-- ── Preview Panel ───────────────────────────────────── -->
+            <div class="glass preview-panel">
+                <div class="glass-inner" style="width:100%;display:flex;align-items:center;justify-content:center;min-height:420px;">
+                    <canvas id="imageCanvas"></canvas>
+                    <div id="placeholder-text">
+                        <span class="ph-icon">🗺️</span>
+                        <span>Upload an image to preview the watermark</span>
+                    </div>
                 </div>
             </div>
 
         </main>
 
-        <footer class="mt-12 py-4 text-center text-xs text-slate-500 bg-slate-100 rounded">
-            &copy; Rohil Kohli 2025. All rights reserved.
+        <footer>
+            <p>&copy; <a href="https://github.com/rohilkohli" target="_blank" rel="noopener">Rohil Kohli</a> 2025 · All rights reserved · <a href="README.md">Docs</a></p>
         </footer>
+
     </div>
 
     <script>
